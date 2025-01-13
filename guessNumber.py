@@ -6,15 +6,15 @@ def validateUserInput(userInput):
 
 def main():
     randomNumber=random.randint(1,100)
-    hasCorrectlyGuessedNumber=False
+    isCorrectlyGuessed=False
     userGuessedNumber=input("Guess a number between 1 and 100:")
-    totalGuesses=0
-    while not hasCorrectlyGuessedNumber:
+    guessCount=0
+    while not isCorrectlyGuessed:
         if not validateUserInput(userGuessedNumber):
             userGuessedNumber=input("I wont count this one Please enter a number between 1 to 100")
             continue
         else:
-            totalGuesses+=1
+            guessCount+=1
             userGuessedNumber=int(userGuessedNumber)
 
         if userGuessedNumber<randomNumber:
@@ -22,8 +22,8 @@ def main():
         elif userGuessedNumber>randomNumber:
             userGuessedNumber=input("Too High. Guess again")
         else:
-            print("You guessed it in",totalGuesses,"guesses!")
-            hasCorrectlyGuessedNumber=True
+            print("You guessed it in",guessCount,"guesses!")
+            isCorrectlyGuessed=True
 
 
 main()

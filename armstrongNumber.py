@@ -1,20 +1,20 @@
 def getArmstrongNumber(userInput):
     # Initializing Sum and Number of Digits
     armstrongNumber = 0
-    totalDigitCountInNumber = 0
+    totalDigits = 0
 
     # Calculating Number of individual digits
-    userInputCopy = userInput
-    while userInputCopy > 0:
-        totalDigitCountInNumber = totalDigitCountInNumber + 1
-        userInputCopy = userInputCopy // 10
+    currentNumber = userInput
+    while currentNumber > 0:
+        totalDigits = totalDigits + 1
+        currentNumber = currentNumber // 10
 
     # Finding Armstrong Number
-    userInputCopy = userInput
-    for _ in range(1, userInputCopy + 1):
-        unitPlaceDigit = userInputCopy % 10
-        armstrongNumber = armstrongNumber + (unitPlaceDigit ** totalDigitCountInNumber)
-        userInputCopy //= 10
+    currentNumber = userInput
+    for _ in range(1, currentNumber + 1):
+        unitPlaceDigit = currentNumber % 10
+        armstrongNumber = armstrongNumber + (unitPlaceDigit ** totalDigits)
+        currentNumber //= 10
     return armstrongNumber
 
 

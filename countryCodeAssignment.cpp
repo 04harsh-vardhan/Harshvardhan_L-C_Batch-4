@@ -4,19 +4,19 @@
 
 std::string getCountryName(std::string countryCode)
 {
-    std::map<std::string, std::string> countryCodewithCountryName = {
+    std::map<std::string, std::string> countryCodeWithName = {
         {"IN", "India"},
         {"AUS", "Australia"},
         {"NZ", "NewZealand"},
         {"US", "United states"}};
-    auto countryIterator = countryCodewithCountryName.find(countryCode);
-    if(countryIterator != countryCodewithCountryName.end())
+    auto countryIterator = countryCodeWithName.find(countryCode);
+    if(countryIterator != countryCodeWithName.end())
     {
         return countryIterator->second;
     }
     else
     {
-        return "No Country Exists with That Code\n Try Again\n";
+        return "No country exists with that code\n try again\n";
     }
 }
 
@@ -24,7 +24,7 @@ int main()
 {
     while(1)
     {
-    std::cout << "Type the country Code" << std::endl;
+    std::cout << "Type the country code" << std::endl;
     std::string countryCode;
     std::cin >> countryCode;
     std::cout<<getCountryName(countryCode)<<std::endl;
