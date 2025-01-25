@@ -4,7 +4,7 @@ def main():
     startGame()
         
 def startGame():
-    number=random.randint(1,100)
+    targetNumber=random.randint(1,100)
     isUserGuessedSuccess=False
     userInput=input("Guess a number between 1 and 100:")
     totalGuesses=0
@@ -14,23 +14,23 @@ def startGame():
             userInput = input(message)
             continue
         totalGuesses+=1
-        isUserGuessedSuccess,message = checkUserGuess(userInput,number)
+        isUserGuessedSuccess,message = checkUserGuess(userInput,targetNumber)
         if not isUserGuessedSuccess:
             userInput = input(message)
         print("You guessed it in",totalGuesses,"guesses!")
 
-def fun(input):
+def isValidUserInput(input):
     if input.isdigit() and 1<= int(input) <=100:
         return True
     else:
         return False
 
-def checkUserGuess(userInput,number):
+def checkUserGuess(userInput,targetNumber):
     isSuccess = False
     message = None
-    if userInput<number:
+    if userInput<targetNumber:
         message="Too low. Guess again"
-    elif userInput>number:
+    elif userInput>targetNumber:
         message="Too High. Guess again"
     else:
         isSuccess=True
@@ -39,7 +39,7 @@ def checkUserGuess(userInput,number):
 def validateInput(userInput):
     isInputValid = False
     message = None
-    if not fun(userInput):
+    if not isValidUserInput(userInput):
         message="I wont count this one Please enter a number between 1 to 100"
     else:
         userInput=int(userInput)
