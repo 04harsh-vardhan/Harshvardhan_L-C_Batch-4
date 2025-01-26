@@ -9,7 +9,7 @@ def startGame():
     userInput=input("Guess a number between 1 and 100:")
     totalGuesses=0
     while not isUserGuessedSuccess:
-        isInputValid,message = validateInput(userInput)
+        isInputValid,message = validate(userInput)
         if not isInputValid:
             userInput = input(message)
             continue
@@ -36,7 +36,7 @@ def checkUserGuess(userInput,targetNumber):
         isSuccess=True
     return isSuccess,message;
 
-def validateInput(userInput):
+def validate(userInput):
     isInputValid = False
     message = None
     if not isValidUserInput(userInput):
