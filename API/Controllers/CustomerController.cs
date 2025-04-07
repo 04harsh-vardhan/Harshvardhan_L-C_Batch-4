@@ -43,11 +43,3 @@ namespace OnShopApi_s.Controllers
         }
     }
 }
-//{
-//    "customerId": "CUST100",
-//  "name": "Alice Johnson",
-//  "email": "alice.johnson@example.com",
-//  "password": "Password!234",
-//  "address": "789 Pine St, Seattle, WA",
-//  "age": 35
-//}

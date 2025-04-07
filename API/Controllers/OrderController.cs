@@ -30,7 +30,3 @@ namespace OnShopApi_s.Controllers
 
     }
 }
-//{
-//    "customerId": "1",
-//  "productId": "P001"
-//}
