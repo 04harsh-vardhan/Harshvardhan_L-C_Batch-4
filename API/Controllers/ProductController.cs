@@ -16,8 +16,13 @@ namespace OnShopApi_s.Controllers
         [HttpGet("products")]
         public async Task<IActionResult> GetAllProducts()
         {
-            List<Product> products = await _productService.GetAllProducts();
-            return Ok(products);
+            try
+            {
+                List<Product> products = await _productService.GetAllProducts();
+                return Ok(products);
+            }
+            catch (Exception ex)
+            { return BadRequest(ex.Message); }
         }
     }
 }

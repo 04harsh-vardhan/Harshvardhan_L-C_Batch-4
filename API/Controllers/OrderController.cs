@@ -17,15 +17,25 @@ namespace OnShopApi_s.Controllers
         [HttpPost("placeOrder")]
         public async Task<IActionResult> PlaceOrder([FromBody] OrderPlaceDto orderPlaceDto)
         {
-            await _orderService.PlaceOrder(orderPlaceDto);
-            return Ok(true);
+            try
+            {
+                await _orderService.PlaceOrder(orderPlaceDto);
+                return Ok(true);
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+
         }
 
         [HttpGet("getAllOrders/{customerId}")]
         public async Task<IActionResult> getOrders(string customerId)
         {
-            UserOrders userOrders = await _orderService.GetAllOrders(customerId);
-            return Ok(userOrders);
+            try
+            {
+                UserOrders userOrders = await _orderService.GetAllOrders(customerId);
+                return Ok(userOrders);
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+
         }
 
     }

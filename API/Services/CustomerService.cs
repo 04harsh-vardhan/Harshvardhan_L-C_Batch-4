@@ -17,7 +17,7 @@ namespace OnShopApi_s.Services
             Customer customer = await _repository.LoginUser(email, password);
             if (customer == null)
             {
-                return "";
+                throw new OnShopApi.HelperClasses.NoRecordException("No Customer present with these details");
             }
             return customer.customerId;
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OnShopApi.HelperClasses;
 using OnShopApi_s.Models;
 using OnShopApi_s.Models.Dto;
 using OnShopApi_s.Services;
@@ -28,18 +29,33 @@ namespace OnShopApi_s.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser([FromBody] CustomerDto customer)
         {
-            string customerId = await _customerService.LoginUser(customer.email, customer.password);
-            if (!string.IsNullOrEmpty(customerId))
+            try
             {
+                string customerId = await _customerService.LoginUser(customer.email, customer.password);
                 return Ok(customerId);
+
             }
-            return BadRequest();
+            catch (NoRecordException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
         [HttpPost("Signup")]
         public async Task<IActionResult> Signup([FromBody] Customer customer)
         {
-            await _customerService.Signup(customer);
-            return Ok(true);
+            try
+            {
+                await _customerService.Signup(customer);
+                return Ok(true);
+            }
+            catch (Exception ex)
+            { return BadRequest(ex.Message); }
+
         }
     }
 }
