@@ -18,7 +18,7 @@ public static class GeoLocation
 public class OpenWeatherGeocoding
 {
     private const int _limit = 1;
-    private const string API_KEY = "3b832bc5a60597bbe69c3552fc6126d2";
+    private const string API_KEY = "";
     private string GetUrl(string cityName)
     {
         return $"http://api.openweathermap.org/geo/1.0/direct?q={cityName}&limit={_limit}&appid={API_KEY}";
