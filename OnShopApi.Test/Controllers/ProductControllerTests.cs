@@ -24,8 +24,8 @@ namespace OnShopApi.Test.Controllers
             // Arrange
             var mockProducts = new List<Product>
             {
-                new Product { Id = 1, Name = "Product A", Price = 100 },
-                new Product { Id = 2, Name = "Product B", Price = 200 }
+                new Product { productId = "1", productName = "Product A", price = 100 },
+                new Product { productId = "2", productName = "Product B", price = 200 }
             };
 
             _mockService.Setup(s => s.GetAllProducts()).ReturnsAsync(mockProducts);

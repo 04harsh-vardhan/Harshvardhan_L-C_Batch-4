@@ -40,12 +40,12 @@ namespace OnShopApi_s.Tests.Services
             string customerId = "cust01";
             var orders = new List<Order>
             {
-                new Order { orderId = "order1", customerId = customerId },
-                new Order { orderId = "order2", customerId = customerId }
+                new Order(customerId) { orderId = "order1", customerId = customerId },
+                new Order(customerId) { orderId = "order2", customerId = customerId }
             };
 
-            var orderDetail1 = new OrderDetail { orderId = "order1" };
-            var orderDetail2 = new OrderDetail { orderId = "order2" };
+            var orderDetail1 = new OrderDetail("order1", "product1") { orderId = "order1" };
+            var orderDetail2 = new OrderDetail("order2", "product2") { orderId = "order2" };
 
             _mockRepo.Setup(repo => repo.GetOrders(customerId)).ReturnsAsync(orders);
             _mockRepo.Setup(repo => repo.GetOrderDetail("order1")).ReturnsAsync(orderDetail1);
