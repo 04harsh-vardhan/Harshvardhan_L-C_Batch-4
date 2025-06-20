@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NewsAggregation.Models.DTO;
 
 namespace NewsAggregation.Models
 {
@@ -17,6 +18,8 @@ namespace NewsAggregation.Models
         public DbSet<Category> Categories { get; set; }
         public DbSet<ExternalServer> ExternalServers { get; set; }
         public DbSet<SavedArticle> SavedArticles { get; set; }
+        public DbSet<ArticleCategory> ArticleCategories { get; set; }
+        public DbSet<NotificationPreference> NotificationPreferences { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -29,8 +32,10 @@ namespace NewsAggregation.Models
             modelBuilder.Entity<Role>().ToTable("Roles").HasKey(r => r.RoleId);
             modelBuilder.Entity<Article>().ToTable("Articles").HasKey(a => a.Article_Id);
             modelBuilder.Entity<Category>().ToTable("Categories").HasKey(c => c.Category_Id);
-            modelBuilder.Entity<ExternalServer>().ToTable("ExternalServers").HasKey(e => e.Server_ID);
+            modelBuilder.Entity<ExternalServer>().ToTable("External_Servers").HasKey(e => e.Server_ID);
             modelBuilder.Entity<SavedArticle>().ToTable("SavedArticles").HasKey(e => e.SavedArticleId);
+            modelBuilder.Entity<ArticleCategory>().ToTable("Article_Categories").HasKey(a => a.ArticleCategoryId);
+            modelBuilder.Entity<NotificationPreference>().ToTable("Notification_Preferences").HasKey(n => n.NotificationPreferenceId);
         }
     }
 }

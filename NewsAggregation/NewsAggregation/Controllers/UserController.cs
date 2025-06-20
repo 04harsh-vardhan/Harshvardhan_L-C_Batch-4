@@ -16,7 +16,14 @@ namespace NewsAggregation.Controllers
             _userService = userService;
             _logger = logger;
         }
-
+        /// <summary>
+        /// {
+        ///"email": "john.doe@example.com",
+        ///"password": "qwerty"
+        ///}
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [HttpPost("signup")]
         public async Task<ActionResult> SignupUser(SignupUserDto user)
         {

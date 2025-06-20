@@ -2,5 +2,7 @@
 {
     public interface ILoginScreen
     {
+        public Task<bool> Login();
+        public Task<bool> SignUp();
     }
 }

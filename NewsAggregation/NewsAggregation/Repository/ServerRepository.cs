@@ -16,15 +16,36 @@ namespace NewsAggregation.Repository
         {
             return await _dbContext.ExternalServers.ToListAsync();
         }
-        public async Task<bool> updateServerApiKey(int serverID, string apiKey)
+        public async Task<bool> UpdateServerApiKey(int serverID, string apiKey, bool serverStatus)
         {
-            ExternalServer? server = await _dbContext.ExternalServers.FirstOrDefaultAsync((server) => server.Server_ID == serverID);
-            if (server != null)
+            try
             {
-                server.Server_API_KEY = apiKey;
+                ExternalServer? server = await _dbContext.ExternalServers.FirstOrDefaultAsync((server) => server.Server_ID == serverID);
+                if (server != null)
+                {
+                    server.Server_API_KEY = apiKey;
+                    server.Server_Status = serverStatus;
+                }
+                await _dbContext.SaveChangesAsync();
+                return true;
             }
-            await _dbContext.SaveChangesAsync();
-            return true;
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<bool> AddServer(ExternalServer externalServer)
+        {
+            try
+            {
+                await _dbContext.ExternalServers.AddAsync(externalServer);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

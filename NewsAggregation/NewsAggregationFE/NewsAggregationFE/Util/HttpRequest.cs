@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net.Http.Json;
+using Newtonsoft.Json;
 
 namespace NewsAggregationFE.Util
 {
@@ -17,9 +18,24 @@ namespace NewsAggregationFE.Util
             }
             catch (Exception ex)
             {
-                throw new Exception("Email or password is wrong");
+                throw new Exception(ex.Message);
             }
 
+        }
+        public static async Task<TOut?> GetPost<TIn, TOut>(TIn reqModel, string url)
+        {
+            try
+            {
+                HttpResponseMessage httpResponseMessage = await _httpClient.PostAsJsonAsync(url, reqModel);
+                httpResponseMessage.EnsureSuccessStatusCode();
+                string apiResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+                TOut? response = JsonConvert.DeserializeObject<TOut>(apiResponse);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

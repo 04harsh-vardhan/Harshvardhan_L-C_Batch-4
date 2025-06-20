@@ -16,5 +16,14 @@ namespace NewsAggregation.Repository
             return await _dbContext.Categories.Where(c => c.Category_Name.ToLower() == categoryName.ToLower()).Select(c => c.Category_Id)
                 .FirstOrDefaultAsync();
         }
+        public async Task<List<Category>> GetAllCategories()
+        {
+            return await _dbContext.Categories.ToListAsync();
+        }
+        public async Task SaveCategory(Category category)
+        {
+            await _dbContext.Categories.AddAsync(category);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

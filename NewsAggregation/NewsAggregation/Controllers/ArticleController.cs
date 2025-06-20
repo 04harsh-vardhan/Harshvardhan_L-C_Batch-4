@@ -14,35 +14,35 @@ namespace NewsAggregation.Controllers
             _articleService = articleService;
         }
 
-        [HttpPost("Sync")]
-        public async Task<IActionResult> SyncNews()
-        {
-            try
-            {
-                return Ok(await _articleService.SyncNews());
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
         [HttpGet("GetNews")]
-        public async Task<IActionResult> GetNews([FromQuery] string startDate, [FromQuery] string endDate, [FromQuery] string category)
+        public async Task<IActionResult> GetNews([FromQuery] string? startDate = null, [FromQuery] string? endDate = null, [FromQuery] string? category = null)
         {
-            // Two filters
-            // Date Range and Category
-            // Date Range Filter to show the news
             try
             {
-                return Ok(await _articleService.GetNews(startDate, endDate, category));
+                startDate ??= DateTime.Today.ToString("yyyy-MM-dd");
+                endDate ??= DateTime.Today.ToString("yyyy-MM-dd");
+                category ??= "general";
+
+                var result = await _articleService.GetNews(startDate, endDate, category);
+                return Ok(new
+                {
+                    success = true,
+                    data = result,
+                    count = result.Count,
+                    filters = new { startDate, endDate, category }
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, new { success = false, message = "An error occurred while processing your request" });
             }
-
         }
+
         [HttpGet("GetSavedArticles")]
         public async Task<IActionResult> GetSavedArticles([FromQuery] int userId)
         {
@@ -55,6 +55,7 @@ namespace NewsAggregation.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
         [HttpPost("SaveArticle")]
         public async Task<IActionResult> SaveArticle([FromBody] SavedArticleDto savedArticleDto)
         {
@@ -67,15 +68,5 @@ namespace NewsAggregation.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        //[HttpDelete("DeleteArticle")]
-        //public async Task<IActionResult> DeleteSavedArticle([FromQuery] int userId)
-        //{
-        //    try
-        //    { }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
     }
 }

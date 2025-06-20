@@ -6,6 +6,7 @@ namespace NewsAggregation.Services.Interfaces
     public interface IServerService
     {
         public Task<List<ExternalServer>> GetAllServers();
-        public Task<bool> UpdateServerApi(ServerDetailRequestBody serverDetail);
+        public Task<bool> UpdateServerDetails(ServerDetailRequestBody serverDetail);
+        public Task<bool> AddServer(ExternalServerDto externalServerDto);
     }
 }

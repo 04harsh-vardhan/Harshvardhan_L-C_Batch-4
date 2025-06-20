@@ -21,6 +21,31 @@ namespace NewsAggregation.Repository
             await _dbContext.SaveChangesAsync();
             return true;
         }
+        public async Task<int> SaveArticleAndGetId(Article article)
+        {
+            try
+            {
+                await _dbContext.AddAsync(article);
+                await _dbContext.SaveChangesAsync();
+                return article.Article_Id;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task SaveArticleWithCategory(ArticleCategory articleCategory)
+        {
+            try
+            {
+                await _dbContext.AddAsync(articleCategory);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
         public async Task<List<Article>> GetSavedArticles(int userId)
         {
             List<SavedArticle> savedArticles = await _dbContext.SavedArticles.Where(sa => sa.UserId == userId).ToListAsync();
@@ -38,6 +63,26 @@ namespace NewsAggregation.Repository
             {
                 return false;
             }
+        }
+
+        public async Task<List<int>> GetArticleIdsByCategoryId(int categoryId)
+        {
+            return await _dbContext.ArticleCategories
+                .Where(ac => ac.CategoryId == categoryId)
+                .Select(ac => ac.ArticleId)
+                .ToListAsync();
+        }
+
+        public async Task<List<Article>> GetNewArticlesSince(int categoryId, DateTime since)
+        {
+            var articleIds = await _dbContext.ArticleCategories
+                .Where(ac => ac.CategoryId == categoryId)
+                .Select(ac => ac.ArticleId)
+                .ToListAsync();
+
+            return await _dbContext.Articles
+                .Where(a => articleIds.Contains(a.Article_Id) && a.Created_At > since)
+                .ToListAsync();
         }
     }
 }

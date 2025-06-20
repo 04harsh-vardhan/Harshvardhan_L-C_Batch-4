@@ -7,24 +7,34 @@ using NewsAggregationFE.Services;
 using NewsAggregationFE.Services.Interfaces;
 using NewsAggregationFE.State;
 
-public class Program
+namespace NewsAggregationFE
 {
-    public static void Main(string[] args)
+    internal class Program
     {
-        //var config = new ConfigurationBuilder()
-        //      .SetBasePath(AppContext.BaseDirectory)
-        //      .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        //      .Build();
+        public static async Task Main(string[] args)
+        {
+            var services = ConfigureServices();
+            var serviceProvider = services.BuildServiceProvider();
+            AppController appController = serviceProvider.GetRequiredService<AppController>();
+            await appController.Run();
+        }
 
-        var serviceProvider = new ServiceCollection()
-            .AddTransient<AppController>()
-            .AddTransient<IConsoleView, ConsoleView>()
-            .AddTransient<IAuthController, AuthController>()
-            .AddTransient<IAuthService, AuthService>()
-            .AddSingleton<AppState>()
-            .BuildServiceProvider();
+        private static IServiceCollection ConfigureServices()
+        {
+            var services = new ServiceCollection();
 
-        var app = serviceProvider.GetRequiredService<AppController>();
-        app.Run();
+            // Register services
+            services.AddSingleton<IConsoleView, ConsoleView>();
+            services.AddSingleton<IWelcomeScreen, WelcomeScreen>();
+            services.AddSingleton<ILoginScreen, LoginScreen>();
+            services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IAuthController, AuthController>();
+            services.AddSingleton<IAdminController, AdminController>();
+            services.AddSingleton<IUserController, UserController>();
+            services.AddSingleton<AppController>();
+            services.AddSingleton<AppState>();
+
+            return services;
+        }
     }
 }

@@ -8,5 +8,9 @@ namespace NewsAggregation.Repository.Interfaces
         public Task<bool> SaveArticles(List<Article> articles);
         public Task<List<Article>> GetSavedArticles(int userId);
         public Task<bool> SaveUserArticle(int userId, int articleId);
+        public Task<int> SaveArticleAndGetId(Article article);
+        public Task SaveArticleWithCategory(ArticleCategory articleCategory);
+        public Task<List<int>> GetArticleIdsByCategoryId(int categoryId);
+        public Task<List<Article>> GetNewArticlesSince(int categoryId, DateTime since);
     }
 }

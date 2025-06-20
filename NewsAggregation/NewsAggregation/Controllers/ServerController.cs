@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NewsAggregation.Models.DTO;
 using NewsAggregation.Services.Interfaces;
 
 namespace NewsAggregation.Controllers
@@ -18,11 +19,16 @@ namespace NewsAggregation.Controllers
         {
             return Ok(await _serverService.GetAllServers());
         }
-
-        [HttpPost("UpdateServer")]
-        public async Task<IActionResult> UpdateServerDetails()
+        [HttpPost("AddServer")]
+        public async Task<IActionResult> AddServer(ExternalServerDto externalServerDto)
         {
-            return Ok();
+            return Ok(await _serverService.AddServer(externalServerDto));
+        }
+
+        [HttpPut("UpdateServer")]
+        public async Task<IActionResult> UpdateServerDetails([FromBody] ServerDetailRequestBody serverDetail)
+        {
+            return Ok(await _serverService.UpdateServerDetails(serverDetail));
         }
     }
 }

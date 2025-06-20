@@ -1,5 +1,6 @@
 ﻿using NewsAggregationFE.Controllers.Interfaces;
 using NewsAggregationFE.Core.Interfaces;
+using NewsAggregationFE.Core.Models;
 using NewsAggregationFE.Services.Interfaces;
 
 namespace NewsAggregationFE.Controllers
@@ -17,7 +18,7 @@ namespace NewsAggregationFE.Controllers
         {
             string email = _consoleView.ReadInput("Enter your email");
             string password = _consoleView.ReadInput("Enter your Password");
-            return await _authService.Login(email, password);
+            return await _authService.Login(new LoginUserData() { Email = email, Password = password });
         }
     }
 }

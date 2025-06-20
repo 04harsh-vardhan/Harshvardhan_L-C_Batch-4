@@ -32,7 +32,7 @@ namespace NewsAggregation.Services
             await _userRepository.AddUser(user);
             return true;
         }
-        public async Task<string> LoginUser(LoginUserRequestBody loginUserRequest)
+        public async Task<LoginResponseDto> LoginUser(LoginUserRequestBody loginUserRequest)
         {
             User? user = await _userRepository.GetSingleUser(loginUserRequest.Email);
             if (user == null)
@@ -47,7 +47,7 @@ namespace NewsAggregation.Services
             }
             //Todo: here I need to generate the JWT token for the user
             string role = await _userRepository.GetRoleById(user.RoleId);
-            return GenerateJwtToken(user, role);
+            return new LoginResponseDto { Token = GenerateJwtToken(user, role), Role = role };
         }
         private string GenerateJwtToken<T>(T user, string role) where T : User
         {
