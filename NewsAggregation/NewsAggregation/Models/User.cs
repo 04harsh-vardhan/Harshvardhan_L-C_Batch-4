@@ -17,5 +17,9 @@ namespace NewsAggregation.Models
         public string Password { get; set; }
         [Column("role_id")]
         public int RoleId { get; set; }
+        public Role Role { get; private set; }
+        public List<Keyword> Keywords { get; private set; }
+        public List<Like> Likes { get; private set; }
+        public List<SavedArticle> SavedArticles { get; private set; }
     }
 }

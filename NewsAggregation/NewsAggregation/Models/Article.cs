@@ -17,5 +17,7 @@ namespace NewsAggregation.Models
         public string? Article_Url { get; set; }
         [Column("created_at")]
         public DateTime Created_At { get; set; } = DateTime.UtcNow;
+        public List<Like> Likes { get; private set; }
+        public List<SavedArticle> SavedArticles { get; private set; }
     }
 }

@@ -5,6 +5,7 @@
         public int ArticleId { get; set; }
         public int UserId { get; set; }
         public int SavedArticleId { get; set; }
-
+        public User User { get; private set; }
+        public Article Article { get; private set; }
     }
 }

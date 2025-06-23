@@ -31,6 +31,7 @@ namespace NewsAggregationFE
             services.AddSingleton<IAuthController, AuthController>();
             services.AddSingleton<IAdminController, AdminController>();
             services.AddSingleton<IUserController, UserController>();
+            services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<AppController>();
             services.AddSingleton<AppState>();
 

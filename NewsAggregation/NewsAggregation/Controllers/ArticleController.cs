@@ -28,9 +28,7 @@ namespace NewsAggregation.Controllers
                 return Ok(new
                 {
                     success = true,
-                    data = result,
-                    count = result.Count,
-                    filters = new { startDate, endDate, category }
+                    data = result
                 });
             }
             catch (ArgumentException ex)

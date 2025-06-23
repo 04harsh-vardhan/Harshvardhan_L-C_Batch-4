@@ -1,6 +1,6 @@
 ﻿namespace NewsAggregationFE.Core.Models
 {
-    public class ExternalServerDetails
+    public class ExternalServerList
     {
         public string ApiName { get; set; }
         public string Status { get; set; }

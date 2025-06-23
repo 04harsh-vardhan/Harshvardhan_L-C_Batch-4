@@ -37,5 +37,20 @@ namespace NewsAggregationFE.Util
                 throw new Exception(ex.Message);
             }
         }
+        public static async Task<TOut?> Put<TIn, TOut>(TIn reqModel, string url)
+        {
+            try
+            {
+                HttpResponseMessage httpResponseMessage = await _httpClient.PutAsJsonAsync(url, reqModel);
+                httpResponseMessage.EnsureSuccessStatusCode();
+                string apiResponse = await httpResponseMessage.Content.ReadAsStringAsync();
+                TOut? response = JsonConvert.DeserializeObject<TOut>(apiResponse);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }

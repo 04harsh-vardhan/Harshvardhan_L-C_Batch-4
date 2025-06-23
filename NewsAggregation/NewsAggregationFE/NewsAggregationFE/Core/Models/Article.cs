@@ -9,7 +9,7 @@ namespace NewsAggregationFE.Core.Models
         public string Url { get; set; }
         public string Category { get; set; }
         public DateTime PublishedAt { get; set; }
-        public int Likes { get; set; }
-        public int Dislikes { get; set; }
+        public int Likes { get; set; } = 0;
+        public int Dislikes { get; set; } = 0;
     }
-} 
+}

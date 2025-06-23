@@ -8,5 +8,6 @@ namespace NewsAggregation.Models
         public int RoleId { get; set; }
         [Column("role")]
         public string UserRole { get; set; }
+        public List<User> Users;
     }
 }
