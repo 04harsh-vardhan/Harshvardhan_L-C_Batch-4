@@ -28,7 +28,6 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-// Add the background service
 builder.Services.AddHostedService<ArticleSyncHostedService>();
 
 var app = builder.Build();

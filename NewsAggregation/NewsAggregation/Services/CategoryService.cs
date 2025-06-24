@@ -17,5 +17,9 @@ namespace NewsAggregation.Services
             await _categoryRepository.SaveCategory(new Category { Category_Name = category });
             return true;
         }
+        public async Task<List<Category>> GetAllCategories()
+        {
+            return await _categoryRepository.GetAllCategories();
+        }
     }
 }

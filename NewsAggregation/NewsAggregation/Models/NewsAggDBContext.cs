@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NewsAggregation.Models.DTO;
 
 namespace NewsAggregation.Models
 {
@@ -14,12 +13,15 @@ namespace NewsAggregation.Models
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<Like> Likes { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ExternalServer> ExternalServers { get; set; }
         public DbSet<SavedArticle> SavedArticles { get; set; }
         public DbSet<ArticleCategory> ArticleCategories { get; set; }
-        public DbSet<NotificationPreference> NotificationPreferences { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<PendingNotification> PendingNotifications { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -44,14 +46,6 @@ namespace NewsAggregation.Models
                 entity.Property(r => r.RoleId).ValueGeneratedOnAdd();
             }
             );
-            modelBuilder.Entity<Keyword>(entity =>
-            {
-                entity.ToTable("Keywords");
-                entity.HasKey(k => k.Keyword_Id);
-                entity.HasOne(k => k.User).WithMany(u => u.Keywords).HasForeignKey(k => k.User_id);
-                entity.Property(k => k.Keyword_Id).ValueGeneratedOnAdd();
-            }
-            );
             modelBuilder.Entity<Like>(entity =>
             {
                 entity.ToTable("Likes");
@@ -70,12 +64,53 @@ namespace NewsAggregation.Models
                 entity.Property(sa => sa.SavedArticleId).ValueGeneratedOnAdd();
             }
             );
-            modelBuilder.Entity<Article>().ToTable("Articles").HasKey(a => a.Article_Id);
-            modelBuilder.Entity<Category>().ToTable("Categories").HasKey(c => c.Category_Id);
-            modelBuilder.Entity<ExternalServer>().ToTable("External_Servers").HasKey(e => e.Server_ID);
-            modelBuilder.Entity<SavedArticle>().ToTable("SavedArticles").HasKey(e => e.SavedArticleId);
-            modelBuilder.Entity<ArticleCategory>().ToTable("Article_Categories").HasKey(a => a.ArticleCategoryId);
-            modelBuilder.Entity<NotificationPreference>().ToTable("Notification_Preferences").HasKey(n => n.NotificationPreferenceId);
+            modelBuilder.Entity<Article>(entity =>
+            {
+                entity.ToTable("Articles");
+                entity.HasKey(a => a.Article_Id);
+                entity.Property(a => a.Article_Id).ValueGeneratedOnAdd();
+            });
+            modelBuilder.Entity<ArticleCategory>(entity =>
+            {
+                entity.ToTable("Article_Categories");
+                entity.HasKey(ac => ac.ArticleCategoryId);
+                entity.HasOne(ac => ac.Article).WithMany(a => a.ArticleCategories).HasForeignKey(ac => ac.ArticleId);
+                entity.HasOne(ac => ac.Category).WithMany(c => c.ArticleCategories).HasForeignKey(ac => ac.CategoryId);
+                entity.Property(ac => ac.ArticleCategoryId).ValueGeneratedOnAdd();
+            }
+            );
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.ToTable("Categories");
+                entity.HasKey(c => c.Category_Id);
+                entity.Property(c => c.Category_Id).ValueGeneratedOnAdd();
+            }
+            );
+            modelBuilder.Entity<ExternalServer>(entity =>
+            {
+                entity.ToTable("External_Servers");
+                entity.HasKey(es => es.Server_ID);
+                entity.Property(es => es.Server_ID).ValueGeneratedOnAdd();
+            }
+            );
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.ToTable("Notifications");
+                entity.HasKey(n => n.Notification_Id);
+                entity.HasOne(n => n.User).WithMany(a => a.Notifications).HasForeignKey(n => n.UserId);
+                entity.HasOne(n => n.Category).WithMany(c => c.Notifications).HasForeignKey(n => n.CategoryId);
+                entity.Property(n => n.Notification_Id).ValueGeneratedOnAdd();
+            }
+            );
+            modelBuilder.Entity<PendingNotification>(entity =>
+            {
+                entity.ToTable("Pending_Notifications");
+                entity.HasKey(pn => pn.PendingNotificationId);
+                entity.HasOne(pn => pn.User).WithMany(u => u.PendingNotifications).HasForeignKey(pn => pn.UserId);
+                entity.HasOne(pn => pn.Article).WithMany(a => a.PendingNotifications).HasForeignKey(pn => pn.ArticleId);
+                entity.Property(pn => pn.PendingNotificationId).ValueGeneratedOnAdd();
+            }
+            );
         }
     }
 }

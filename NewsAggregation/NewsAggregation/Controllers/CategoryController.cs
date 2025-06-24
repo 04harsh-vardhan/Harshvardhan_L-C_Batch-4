@@ -18,5 +18,10 @@ namespace NewsAggregation.Controllers
         {
             return Ok(await _categoryService.AddCategory(categoryReqBody.CategoryName));
         }
+        [HttpGet("AllCategories")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            return Ok(await _categoryService.GetAllCategories());
+        }
     }
 }

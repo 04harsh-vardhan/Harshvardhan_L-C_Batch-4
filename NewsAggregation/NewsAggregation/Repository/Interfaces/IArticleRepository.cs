@@ -1,4 +1,5 @@
 ﻿using NewsAggregation.Models;
+using NewsAggregation.Models.DTO;
 
 namespace NewsAggregation.Repository.Interfaces
 {
@@ -12,5 +13,6 @@ namespace NewsAggregation.Repository.Interfaces
         public Task SaveArticleWithCategory(ArticleCategory articleCategory);
         public Task<List<int>> GetArticleIdsByCategoryId(int categoryId);
         public Task<List<Article>> GetNewArticlesSince(int categoryId, DateTime since);
+        Task<List<Article>> SearchArticlesAsync(ArticleSearchRequest request);
     }
 }

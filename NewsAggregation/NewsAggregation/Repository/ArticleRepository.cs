@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsAggregation.Models;
+using NewsAggregation.Models.DTO;
 using NewsAggregation.Repository.Interfaces;
 
 namespace NewsAggregation.Repository
@@ -13,7 +14,14 @@ namespace NewsAggregation.Repository
         }
         public async Task<List<Article>> GetFilteredNewsWithDate(DateTime startDate, DateTime endDate)
         {
-            return await _dbContext.Articles.Where(a => a.Created_At >= startDate && a.Created_At <= endDate).ToListAsync();
+            try
+            {
+                return await _dbContext.Articles.Where(a => a.Created_At >= startDate && a.Created_At <= endDate).ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         public async Task<bool> SaveArticles(List<Article> articles)
         {
@@ -82,6 +90,22 @@ namespace NewsAggregation.Repository
 
             return await _dbContext.Articles
                 .Where(a => articleIds.Contains(a.Article_Id) && a.Created_At > since)
+                .ToListAsync();
+        }
+        public async Task<List<Article>> SearchArticlesAsync(ArticleSearchRequest request)
+        {
+            var query = _dbContext.Articles
+                .Where(a => !a.IsDeleted && a.Article_Description != null &&
+                            a.Article_Description.ToLower().Contains(request.Keyword.ToLower()));
+
+            if (request.StartDate.HasValue)
+                query = query.Where(a => a.Created_At >= request.StartDate.Value);
+
+            if (request.EndDate.HasValue)
+                query = query.Where(a => a.Created_At <= request.EndDate.Value);
+
+            return await query
+                .OrderByDescending(a => a.Created_At)
                 .ToListAsync();
         }
     }

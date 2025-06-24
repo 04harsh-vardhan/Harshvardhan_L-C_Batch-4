@@ -17,7 +17,12 @@ namespace NewsAggregation.Models
         public string? Article_Url { get; set; }
         [Column("created_at")]
         public DateTime Created_At { get; set; } = DateTime.UtcNow;
+        public bool IsDeleted { get; set; } = false;
+        public int LikesCount { get; set; }
+        public int DislikesCount { get; set; }
         public List<Like> Likes { get; private set; }
         public List<SavedArticle> SavedArticles { get; private set; }
+        public List<ArticleCategory> ArticleCategories { get; private set; }
+        public List<PendingNotification> PendingNotifications { get; private set; }
     }
 }

@@ -22,7 +22,6 @@ namespace NewsAggregation.Controllers
             {
                 startDate ??= DateTime.Today.ToString("yyyy-MM-dd");
                 endDate ??= DateTime.Today.ToString("yyyy-MM-dd");
-                category ??= "general";
 
                 var result = await _articleService.GetNews(startDate, endDate, category);
                 return Ok(new
@@ -38,6 +37,19 @@ namespace NewsAggregation.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { success = false, message = "An error occurred while processing your request" });
+            }
+        }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchArticles([FromQuery] ArticleSearchRequest request)
+        {
+            try
+            {
+                var articles = await _articleService.SearchArticlesAsync(request);
+                return Ok(articles);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 

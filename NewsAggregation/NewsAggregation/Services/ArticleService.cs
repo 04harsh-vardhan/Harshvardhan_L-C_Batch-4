@@ -1,4 +1,5 @@
 ﻿using NewsAggregation.Models;
+using NewsAggregation.Models.DTO;
 using NewsAggregation.Models.NewsApi.Models;
 using NewsAggregation.Repository.Interfaces;
 using NewsAggregation.Services.Interfaces;
@@ -18,7 +19,7 @@ namespace NewsAggregation.Services
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IList<Article>> GetNews(string startDate, string endDate, string category)
+        public async Task<IList<Article>> GetNews(string startDate, string endDate, string? category)
         {
             if (!DateTime.TryParse(startDate, out DateTime startDate1))
             {
@@ -34,12 +35,6 @@ namespace NewsAggregation.Services
                 throw new ArgumentException("End date cannot be earlier than start date");
             }
 
-            var maxDateRange = TimeSpan.FromDays(30);
-            if (endDate1 - startDate1 > maxDateRange)
-            {
-                throw new ArgumentException($"Date range cannot exceed {maxDateRange.Days} days");
-            }
-
             try
             {
                 IList<Article> articles = await _articleRepository.GetFilteredNewsWithDate(startDate1, endDate1);
@@ -49,7 +44,7 @@ namespace NewsAggregation.Services
                     return new List<Article>();
                 }
 
-                if (string.IsNullOrEmpty(category) || category.ToLower() == "general")
+                if (string.IsNullOrEmpty(category))
                 {
                     return articles;
                 }
@@ -83,7 +78,9 @@ namespace NewsAggregation.Services
 
         public async Task<bool> SyncNews()
         {
-            await SyncTheNewsApi();
+            var task1 = Task.Run(() => SyncTheNewsApi());
+            var task2 = Task.Run(() => SyncNewsApi());
+            await Task.WhenAll(task1, task2);
             return true;
         }
 
@@ -103,13 +100,20 @@ namespace NewsAggregation.Services
                 return false;
             }
         }
+        public async Task<List<Article>> SearchArticlesAsync(ArticleSearchRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Keyword))
+                throw new ArgumentException("Keyword is required");
+
+            return await _articleRepository.SearchArticlesAsync(request);
+        }
 
         private async Task<bool> SyncTheNewsApi()
         {
             try
             {
-                string api_url = _configuration["NewsApiUrls:TheNewsApi"];
-                string token = _configuration["NewsApiKeys:TheNewsApi"];
+                string api_url = _configuration["NewsApiUrls:TheNewsApi"] ?? "";
+                string token = _configuration["NewsApiKeys:TheNewsApi"] ?? "";
                 api_url = BuildUrlTheNewsApi(api_url, token);
                 TheNewsApi? theNewsApi = await GetApiData<TheNewsApi>(api_url);
                 List<Category> allCategories = await _categoryRepository.GetAllCategories();
@@ -126,12 +130,13 @@ namespace NewsAggregation.Services
         {
             try
             {
-                string api_url = _configuration["NewsApiUrls:NewsApi"];
-                string token = _configuration["NewsApiKeys:NewsApi"];
+                string api_url = _configuration["NewsApiUrls:NewsApi"] ?? "";
+                string token = _configuration["NewsApiKeys:NewsApi"] ?? "";
                 api_url = BuildUrlNewsApi(api_url, token);
                 NewsApi? newsApi = await GetApiData<NewsApi>(api_url);
-                List<Article> articles = MapNewsApiToArticleModel(newsApi);
-                return await _articleRepository.SaveArticles(articles);
+                List<Category> allCategories = await _categoryRepository.GetAllCategories();
+                await MapNewsApiToArticleModel(newsApi, allCategories);
+                return true;
             }
             catch (Exception ex)
             {
@@ -167,13 +172,13 @@ namespace NewsAggregation.Services
                     int? categoryId = allCategories.FirstOrDefault(c => c.Category_Name.ToLower() == category.ToLower())?.Category_Id;
                     if (categoryId != null)
                     {
-                        await _articleRepository.SaveArticleWithCategory(new ArticleCategory { ArticleId = articleId, CategoryId = categoryId ?? 1 });
+                        await _articleRepository.SaveArticleWithCategory(new ArticleCategory { ArticleId = articleId, CategoryId = (int)categoryId });
                     }
                 }
             }
         }
 
-        private List<Article> MapNewsApiToArticleModel(NewsApi newsApi)
+        private async Task MapNewsApiToArticleModel(NewsApi newsApi, List<Category> allCategories)
         {
             List<Article> articles = new();
             foreach (Article2 newsApiArticle in newsApi.Articles)
@@ -185,9 +190,17 @@ namespace NewsAggregation.Services
                     Article_Source = newsApiArticle.Source.Name,
                     Article_Url = newsApiArticle.Url
                 };
-                articles.Add(newArticle);
+                int articleId = await _articleRepository.SaveArticleAndGetId(newArticle);
+                bool isCategoryPresent = false;
+                foreach (Category category in allCategories)
+                {
+                    if (newArticle.Article_Description.Contains(category.Category_Name))
+                    {
+                        isCategoryPresent = true;
+                        await _articleRepository.SaveArticleWithCategory(new ArticleCategory { ArticleId = articleId, CategoryId = (int)category.Category_Id });
+                    }
+                }
             }
-            return articles;
         }
 
         private static string BuildUrlTheNewsApi(string url, string token)
