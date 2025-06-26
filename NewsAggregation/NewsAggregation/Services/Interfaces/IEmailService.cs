@@ -7,4 +7,4 @@ namespace NewsAggregation.Services.Interfaces
         Task SendEmailAsync(string to, string subject, string body);
         Task SendArticleNotificationAsync(string email, Article article);
     }
-} 
+}

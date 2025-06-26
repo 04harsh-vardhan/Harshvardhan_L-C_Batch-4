@@ -1,9 +1,7 @@
 ﻿using NewsAggregation.Models;
 using NewsAggregation.Models.DTO;
-using NewsAggregation.Models.NewsApi.Models;
 using NewsAggregation.Repository.Interfaces;
 using NewsAggregation.Services.Interfaces;
-using Newtonsoft.Json;
 
 namespace NewsAggregation.Services
 {
@@ -76,13 +74,6 @@ namespace NewsAggregation.Services
             }
         }
 
-        public async Task<bool> SyncNews()
-        {
-            var task1 = Task.Run(() => SyncTheNewsApi());
-            var task2 = Task.Run(() => SyncNewsApi());
-            await Task.WhenAll(task1, task2);
-            return true;
-        }
 
         public async Task<List<Article>> GetSavedArticles(int userId)
         {
@@ -108,109 +99,11 @@ namespace NewsAggregation.Services
             return await _articleRepository.SearchArticlesAsync(request);
         }
 
-        private async Task<bool> SyncTheNewsApi()
-        {
-            try
-            {
-                string api_url = _configuration["NewsApiUrls:TheNewsApi"] ?? "";
-                string token = _configuration["NewsApiKeys:TheNewsApi"] ?? "";
-                api_url = BuildUrlTheNewsApi(api_url, token);
-                TheNewsApi? theNewsApi = await GetApiData<TheNewsApi>(api_url);
-                List<Category> allCategories = await _categoryRepository.GetAllCategories();
-                await MapTheNewsApiToArticleModel(theNewsApi, allCategories);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
 
-        private async Task<bool> SyncNewsApi()
-        {
-            try
-            {
-                string api_url = _configuration["NewsApiUrls:NewsApi"] ?? "";
-                string token = _configuration["NewsApiKeys:NewsApi"] ?? "";
-                api_url = BuildUrlNewsApi(api_url, token);
-                NewsApi? newsApi = await GetApiData<NewsApi>(api_url);
-                List<Category> allCategories = await _categoryRepository.GetAllCategories();
-                await MapNewsApiToArticleModel(newsApi, allCategories);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
 
-        private async Task<T?> GetApiData<T>(string api_url)
-        {
-            HttpClient client = new HttpClient();
-            HttpResponseMessage httpResponse = await client.GetAsync(api_url);
-            httpResponse.EnsureSuccessStatusCode();
-            string apiResponse = await httpResponse.Content.ReadAsStringAsync();
-            T? theNewsApi = JsonConvert.DeserializeObject<T>(apiResponse);
-            return theNewsApi;
-        }
 
-        private async Task MapTheNewsApiToArticleModel(TheNewsApi theNewsApi, List<Category> allCategories)
-        {
-            foreach (Article1 theNewsApiArticle in theNewsApi.Articles)
-            {
-                Article article = new Article()
-                {
-                    Article_Title = theNewsApiArticle.Title,
-                    Article_Description = theNewsApiArticle.Description,
-                    Article_Source = theNewsApiArticle.Source,
-                    Article_Url = theNewsApiArticle.Url
-                };
-                int articleId = await _articleRepository.SaveArticleAndGetId(article);
-                List<string> artCategories = theNewsApiArticle.Categories;
-                foreach (string category in artCategories)
-                {
-                    int? categoryId = allCategories.FirstOrDefault(c => c.Category_Name.ToLower() == category.ToLower())?.Category_Id;
-                    if (categoryId != null)
-                    {
-                        await _articleRepository.SaveArticleWithCategory(new ArticleCategory { ArticleId = articleId, CategoryId = (int)categoryId });
-                    }
-                }
-            }
-        }
 
-        private async Task MapNewsApiToArticleModel(NewsApi newsApi, List<Category> allCategories)
-        {
-            List<Article> articles = new();
-            foreach (Article2 newsApiArticle in newsApi.Articles)
-            {
-                Article newArticle = new Article()
-                {
-                    Article_Description = newsApiArticle.Description,
-                    Article_Title = newsApiArticle.Title,
-                    Article_Source = newsApiArticle.Source.Name,
-                    Article_Url = newsApiArticle.Url
-                };
-                int articleId = await _articleRepository.SaveArticleAndGetId(newArticle);
-                bool isCategoryPresent = false;
-                foreach (Category category in allCategories)
-                {
-                    if (newArticle.Article_Description.Contains(category.Category_Name))
-                    {
-                        isCategoryPresent = true;
-                        await _articleRepository.SaveArticleWithCategory(new ArticleCategory { ArticleId = articleId, CategoryId = (int)category.Category_Id });
-                    }
-                }
-            }
-        }
 
-        private static string BuildUrlTheNewsApi(string url, string token)
-        {
-            return $"{url}{token}&locale=us&limit={3}";
-        }
 
-        private string BuildUrlNewsApi(string url, string token)
-        {
-            return url + token;
-        }
     }
 }

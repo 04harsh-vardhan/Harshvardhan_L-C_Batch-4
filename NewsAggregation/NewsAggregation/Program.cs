@@ -28,6 +28,11 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
+// Register HttpClientFactory and News API Adapters as Singletons
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters.TheNewsApiAdapter>();
+builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters.NewsApiAdapter>();
+
 builder.Services.AddHostedService<ArticleSyncHostedService>();
 
 var app = builder.Build();
