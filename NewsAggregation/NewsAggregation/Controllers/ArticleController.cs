@@ -9,9 +9,12 @@ namespace NewsAggregation.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly IArticleService _articleService;
-        public ArticleController(IArticleService articleService)
+        private readonly ILogger<ArticleController> _logger;
+        
+        public ArticleController(IArticleService articleService, ILogger<ArticleController> logger)
         {
             _articleService = articleService;
+            _logger = logger;
         }
 
 
@@ -20,10 +23,14 @@ namespace NewsAggregation.Controllers
         {
             try
             {
+                _logger.LogInformation("GetNews request - StartDate: {StartDate}, EndDate: {EndDate}, Category: {Category}", startDate, endDate, category);
+                
                 startDate ??= DateTime.Today.ToString("yyyy-MM-dd");
                 endDate ??= DateTime.Today.ToString("yyyy-MM-dd");
 
                 var result = await _articleService.GetNews(startDate, endDate, category);
+                
+                _logger.LogInformation("GetNews completed successfully - Found {Count} articles", result.Count);
                 return Ok(new
                 {
                     success = true,
@@ -32,10 +39,12 @@ namespace NewsAggregation.Controllers
             }
             catch (ArgumentException ex)
             {
+                _logger.LogWarning("GetNews validation error: {Message}", ex.Message);
                 return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "GetNews failed with error: {Message}", ex.Message);
                 return StatusCode(500, new { success = false, message = "An error occurred while processing your request" });
             }
         }
@@ -44,12 +53,20 @@ namespace NewsAggregation.Controllers
         {
             try
             {
+                _logger.LogInformation("SearchArticles request - Keyword: {Keyword}", request.Keyword);
                 var articles = await _articleService.SearchArticlesAsync(request);
+                _logger.LogInformation("SearchArticles completed - Found {Count} articles", articles.Count);
                 return Ok(articles);
             }
             catch (ArgumentException ex)
             {
+                _logger.LogWarning("SearchArticles validation error: {Message}", ex.Message);
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SearchArticles failed: {Message}", ex.Message);
+                return StatusCode(500, "An error occurred while searching articles");
             }
         }
 
@@ -58,10 +75,14 @@ namespace NewsAggregation.Controllers
         {
             try
             {
-                return Ok(await _articleService.GetSavedArticles(userId));
+                _logger.LogInformation("GetSavedArticles request for UserId: {UserId}", userId);
+                var result = await _articleService.GetSavedArticles(userId);
+                _logger.LogInformation("GetSavedArticles completed - Found {Count} saved articles", result.Count);
+                return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "GetSavedArticles failed for UserId {UserId}: {Message}", userId, ex.Message);
                 return BadRequest(ex.Message);
             }
         }
@@ -71,10 +92,14 @@ namespace NewsAggregation.Controllers
         {
             try
             {
-                return Ok(await _articleService.SaveUserArticle(savedArticleDto.UserId, savedArticleDto.ArticleId));
+                _logger.LogInformation("SaveArticle request - UserId: {UserId}, ArticleId: {ArticleId}", savedArticleDto.UserId, savedArticleDto.ArticleId);
+                var result = await _articleService.SaveUserArticle(savedArticleDto.UserId, savedArticleDto.ArticleId);
+                _logger.LogInformation("SaveArticle completed successfully for UserId: {UserId}", savedArticleDto.UserId);
+                return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "SaveArticle failed for UserId {UserId}, ArticleId {ArticleId}: {Message}", savedArticleDto.UserId, savedArticleDto.ArticleId, ex.Message);
                 return BadRequest(ex.Message);
             }
         }

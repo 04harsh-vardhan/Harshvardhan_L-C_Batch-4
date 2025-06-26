@@ -32,6 +32,8 @@ namespace NewsAggregation.Services.BackgroundServices
 
         private async Task SyncNewsWithFallback(List<INewsApiAdapter> adapters)
         {
+            bool syncSuccessful = false;
+            
             foreach (var adapter in adapters)
             {
                 try
@@ -39,7 +41,8 @@ namespace NewsAggregation.Services.BackgroundServices
                     _logger.LogInformation("Attempting to sync news using {ApiName}", adapter.ApiName);
                     var articles = await adapter.FetchAndMapArticlesAsync();
                     _logger.LogInformation("Successfully synced {Count} articles from {ApiName}", articles.Count, adapter.ApiName);
-                    return; // Success, exit the loop
+                    syncSuccessful = true;
+                    break; // Success, exit the loop
                 }
                 catch (Exception ex)
                 {
@@ -48,7 +51,23 @@ namespace NewsAggregation.Services.BackgroundServices
                 }
             }
             
-            _logger.LogError("All news API adapters failed to sync news");
+            if (!syncSuccessful)
+            {
+                _logger.LogError("All news API adapters failed to sync news");
+                return;
+            }
+
+            // Process notifications after successful sync
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                await notificationService.ProcessNotificationsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to process notifications after sync: {Message}", ex.Message);
+            }
         }
     }
 }

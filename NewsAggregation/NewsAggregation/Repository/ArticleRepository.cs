@@ -8,37 +8,57 @@ namespace NewsAggregation.Repository
     public class ArticleRepository : IArticleRepository
     {
         private readonly NewsAggDBContext _dbContext;
-        public ArticleRepository(NewsAggDBContext dbContext)
+        private readonly ILogger<ArticleRepository> _logger;
+        
+        public ArticleRepository(NewsAggDBContext dbContext, ILogger<ArticleRepository> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
         public async Task<List<Article>> GetFilteredNewsWithDate(DateTime startDate, DateTime endDate)
         {
             try
             {
-                return await _dbContext.Articles.Where(a => a.Created_At >= startDate && a.Created_At <= endDate).ToListAsync();
+                _logger.LogInformation("GetFilteredNewsWithDate called for date range: {StartDate} to {EndDate}", startDate, endDate);
+                var result = await _dbContext.Articles.Where(a => a.Created_At >= startDate && a.Created_At <= endDate).ToListAsync();
+                _logger.LogInformation("Retrieved {Count} articles for date range", result.Count);
+                return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error retrieving filtered news for date range {StartDate} to {EndDate}", startDate, endDate);
                 throw;
             }
         }
         public async Task<bool> SaveArticles(List<Article> articles)
         {
-            await _dbContext.AddRangeAsync(articles);
-            await _dbContext.SaveChangesAsync();
-            return true;
+            try
+            {
+                _logger.LogInformation("SaveArticles called with {Count} articles", articles.Count);
+                await _dbContext.AddRangeAsync(articles);
+                await _dbContext.SaveChangesAsync();
+                _logger.LogInformation("Successfully saved {Count} articles", articles.Count);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving {Count} articles", articles.Count);
+                throw;
+            }
         }
         public async Task<int> SaveArticleAndGetId(Article article)
         {
             try
             {
+                _logger.LogDebug("SaveArticleAndGetId called for article: {Title}", article.Article_Title);
                 await _dbContext.AddAsync(article);
                 await _dbContext.SaveChangesAsync();
+                _logger.LogDebug("Article saved with ID: {ArticleId}", article.Article_Id);
                 return article.Article_Id;
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error saving article: {Title}", article.Article_Title);
                 throw;
             }
         }

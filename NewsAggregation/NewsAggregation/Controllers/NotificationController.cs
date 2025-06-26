@@ -9,18 +9,30 @@ namespace NewsAggregation.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
+        private readonly ILogger<NotificationController> _logger;
 
-        public NotificationController(INotificationService notificationService)
+        public NotificationController(INotificationService notificationService, ILogger<NotificationController> logger)
         {
             _notificationService = notificationService;
+            _logger = logger;
         }
         [HttpPost("create")]
         public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await _notificationService.CreateNotificationAsync(dto);
-            return Ok(result);
+            try
+            {
+                _logger.LogInformation("CreateNotification request for UserId: {UserId}, CategoryId: {CategoryId}", dto.UserId, dto.CategoryId);
+                var result = await _notificationService.CreateNotificationAsync(dto);
+                _logger.LogInformation("CreateNotification completed successfully for UserId: {UserId}", dto.UserId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CreateNotification failed for UserId {UserId}: {Message}", dto.UserId, ex.Message);
+                return StatusCode(500, "An error occurred while creating notification");
+            }
         }
 
         [HttpGet("user-config/{userId}")]
@@ -28,7 +40,9 @@ namespace NewsAggregation.Controllers
         {
             try
             {
+                _logger.LogInformation("GetUserNotificationConfig request for UserId: {UserId}", userId);
                 var result = await _notificationService.GetUserNotificationConfigAsync(userId);
+                _logger.LogInformation("GetUserNotificationConfig completed - Found {Count} configurations for UserId: {UserId}", result.Count, userId);
                 return Ok(new
                 {
                     success = true,
@@ -37,6 +51,7 @@ namespace NewsAggregation.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "GetUserNotificationConfig failed for UserId {UserId}: {Message}", userId, ex.Message);
                 return StatusCode(500, new { success = false, message = "An error occurred while fetching notification configuration" });
             }
         }

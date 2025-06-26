@@ -29,10 +29,14 @@ namespace NewsAggregation.Controllers
         {
             try
             {
-                return Ok(await _userService.SignupUser(user));
+                _logger.LogInformation("SignupUser request for email: {Email}", user.Email);
+                var result = await _userService.SignupUser(user);
+                _logger.LogInformation("SignupUser completed successfully for email: {Email}", user.Email);
+                return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "SignupUser failed for email {Email}: {Message}", user.Email, ex.Message);
                 return BadRequest(ex.Message);
             }
         }
@@ -41,10 +45,14 @@ namespace NewsAggregation.Controllers
         {
             try
             {
-                return Ok(await _userService.LoginUser(loginUserRequest));
+                _logger.LogInformation("LoginUser request for email: {Email}", loginUserRequest.Email);
+                var result = await _userService.LoginUser(loginUserRequest);
+                _logger.LogInformation("LoginUser completed successfully for email: {Email}", loginUserRequest.Email);
+                return Ok(result);
             }
             catch (Exception ex)
             {
+                _logger.LogWarning("LoginUser failed for email {Email}: {Message}", loginUserRequest.Email, ex.Message);
                 return Unauthorized(ex.Message);
             }
         }
