@@ -6,9 +6,19 @@ namespace NewsAggregationFE.Services
 {
     public class AdminService : IAdminService
     {
-        private readonly string _getAllServersUrl = "https://localhost:7035/api/Server/GetAllServers";
-        private readonly string _updateServerUrl = "https://localhost:7035/api/Server/UpdateServer";
-        private readonly string _addCategoryUrl = "https://localhost:7035/api/Category/AddCategory";
+        private readonly string _getAllServersUrl;
+        private readonly string _updateServerUrl;
+        private readonly string _addCategoryUrl;
+
+        public AdminService(AppConfiguration config)
+        {
+            var serverBaseUrl = config.ApiUrls.GetServerUrl();
+            var categoryBaseUrl = config.ApiUrls.GetCategoryUrl();
+            
+            _getAllServersUrl = $"{serverBaseUrl}/GetAllServers";
+            _updateServerUrl = $"{serverBaseUrl}/UpdateServer";
+            _addCategoryUrl = $"{categoryBaseUrl}/AddCategory";
+        }
         public async Task<List<ExternalServerList>> GetExternalServersList()
         {
             ExternalServerResponse? serverResponse = await HttpRequest.GetRequest<ExternalServerResponse>(_getAllServersUrl);
@@ -64,7 +74,7 @@ namespace NewsAggregationFE.Services
             try
             {
                 int id = Int32.Parse(serverId);
-                await HttpRequest.Put<ServerDetailRequestBody, dynamic>(new ServerDetailRequestBody { ServerId = id, ServerApi = apiKey, ServerStatus = true }, _updateServerUrl);
+                await HttpRequest.PutRequest<ServerDetailRequestBody, dynamic>(new ServerDetailRequestBody { ServerId = id, ServerApi = apiKey, ServerStatus = true }, _updateServerUrl);
             }
             catch (Exception e)
             {
@@ -75,7 +85,7 @@ namespace NewsAggregationFE.Services
         {
             try
             {
-                await HttpRequest.GetPost<CategoryReqBody, dynamic>(new CategoryReqBody { CategoryName = category }, _addCategoryUrl);
+                await HttpRequest.PostRequest<CategoryReqBody, dynamic>(new CategoryReqBody { CategoryName = category }, _addCategoryUrl);
             }
             catch (Exception e)
             {

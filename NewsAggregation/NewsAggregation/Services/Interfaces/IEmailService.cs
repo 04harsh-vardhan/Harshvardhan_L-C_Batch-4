@@ -6,5 +6,7 @@ namespace NewsAggregation.Services.Interfaces
     {
         Task SendEmailAsync(string to, string subject, string body);
         Task SendArticleNotificationAsync(string email, Article article);
+        Task SendGroupedArticleNotificationsAsync(string email, string userName, List<Article> articles);
+        Task SendArticleReportNotificationToAdminsAsync(Article article, List<User> adminUsers);
     }
 }

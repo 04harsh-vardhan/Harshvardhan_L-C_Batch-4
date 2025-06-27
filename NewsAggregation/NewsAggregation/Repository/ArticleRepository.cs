@@ -20,7 +20,9 @@ namespace NewsAggregation.Repository
             try
             {
                 _logger.LogInformation("GetFilteredNewsWithDate called for date range: {StartDate} to {EndDate}", startDate, endDate);
-                var result = await _dbContext.Articles.Where(a => a.Created_At >= startDate && a.Created_At <= endDate).ToListAsync();
+                var result = await _dbContext.Articles
+                    .Where(a => a.Created_At >= startDate && a.Created_At <= endDate && !a.IsHidden)
+                    .ToListAsync();
                 _logger.LogInformation("Retrieved {Count} articles for date range", result.Count);
                 return result;
             }
@@ -77,7 +79,9 @@ namespace NewsAggregation.Repository
         public async Task<List<Article>> GetSavedArticles(int userId)
         {
             List<SavedArticle> savedArticles = await _dbContext.SavedArticles.Where(sa => sa.UserId == userId).ToListAsync();
-            return await _dbContext.Articles.Where(a => savedArticles.Any(sa => sa.ArticleId == a.Article_Id)).ToListAsync();
+            return await _dbContext.Articles
+                .Where(a => savedArticles.Any(sa => sa.ArticleId == a.Article_Id) && !a.IsHidden)
+                .ToListAsync();
         }
         public async Task<bool> SaveUserArticle(int userId, int articleId)
         {
@@ -109,13 +113,13 @@ namespace NewsAggregation.Repository
                 .ToListAsync();
 
             return await _dbContext.Articles
-                .Where(a => articleIds.Contains(a.Article_Id) && a.Created_At > since)
+                .Where(a => articleIds.Contains(a.Article_Id) && a.Created_At > since && !a.IsHidden)
                 .ToListAsync();
         }
         public async Task<List<Article>> SearchArticlesAsync(ArticleSearchRequest request)
         {
             var query = _dbContext.Articles
-                .Where(a => !a.IsDeleted && a.Article_Description != null &&
+                .Where(a => !a.IsHidden && a.Article_Description != null &&
                             a.Article_Description.ToLower().Contains(request.Keyword.ToLower()));
 
             if (request.StartDate.HasValue)
@@ -127,6 +131,72 @@ namespace NewsAggregation.Repository
             return await query
                 .OrderByDescending(a => a.Created_At)
                 .ToListAsync();
+        }
+
+        public async Task<Like?> GetUserLikeForArticleAsync(int userId, int articleId)
+        {
+            return await _dbContext.Likes
+                .FirstOrDefaultAsync(l => l.UserId == userId && l.ArticleId == articleId);
+        }
+
+        public async Task AddOrUpdateLikeAsync(Like like)
+        {
+            var existingLike = await GetUserLikeForArticleAsync(like.UserId, like.ArticleId);
+            
+            if (existingLike != null)
+            {
+                existingLike.Status = like.Status;
+                _dbContext.Likes.Update(existingLike);
+            }
+            else
+            {
+                await _dbContext.Likes.AddAsync(like);
+            }
+            
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task RemoveLikeAsync(int userId, int articleId)
+        {
+            var like = await GetUserLikeForArticleAsync(userId, articleId);
+            if (like != null)
+            {
+                _dbContext.Likes.Remove(like);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpdateArticleLikeCountsAsync(int articleId)
+        {
+            var article = await _dbContext.Articles.FindAsync(articleId);
+            if (article != null)
+            {
+                var likeCount = await _dbContext.Likes
+                    .CountAsync(l => l.ArticleId == articleId && l.Status == LikeStatus.Like);
+                    
+                var dislikeCount = await _dbContext.Likes
+                    .CountAsync(l => l.ArticleId == articleId && l.Status == LikeStatus.DisLike);
+
+                article.LikesCount = likeCount;
+                article.DislikesCount = dislikeCount;
+                
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Article?> GetArticleByIdAsync(int articleId)
+        {
+            return await _dbContext.Articles.FindAsync(articleId);
+        }
+
+        public async Task IncrementArticleReportCountAsync(int articleId)
+        {
+            var article = await _dbContext.Articles.FindAsync(articleId);
+            if (article != null)
+            {
+                article.ReportCount++;
+                await _dbContext.SaveChangesAsync();
+            }
         }
     }
 }

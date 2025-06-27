@@ -11,13 +11,17 @@ namespace NewsAggregation.Services
         private readonly IArticleRepository _articleRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ILogger<ArticleService> _logger;
+        private readonly IEmailService _emailService;
+        private readonly IUserRepository _userRepository;
         
-        public ArticleService(IConfiguration configuration, IArticleRepository articleRepository, ICategoryRepository categoryRepository, ILogger<ArticleService> logger)
+        public ArticleService(IConfiguration configuration, IArticleRepository articleRepository, ICategoryRepository categoryRepository, ILogger<ArticleService> logger, IEmailService emailService, IUserRepository userRepository)
         {
             _configuration = configuration;
             _articleRepository = articleRepository;
             _categoryRepository = categoryRepository;
             _logger = logger;
+            _emailService = emailService;
+            _userRepository = userRepository;
         }
 
         public async Task<IList<Article>> GetNews(string startDate, string endDate, string? category)
@@ -126,5 +130,114 @@ namespace NewsAggregation.Services
             return result;
         }
 
+        public async Task<bool> LikeArticleAsync(int userId, int articleId)
+        {
+            try
+            {
+                _logger.LogInformation("LikeArticle called for UserId: {UserId}, ArticleId: {ArticleId}", userId, articleId);
+
+                var existingLike = await _articleRepository.GetUserLikeForArticleAsync(userId, articleId);
+
+                if (existingLike != null && existingLike.Status == LikeStatus.Like)
+                {
+                    _logger.LogInformation("Article {ArticleId} already liked by User {UserId}", articleId, userId);
+                    return false;
+                }
+
+                var like = new Like
+                {
+                    UserId = userId,
+                    ArticleId = articleId,
+                    Status = LikeStatus.Like
+                };
+
+                await _articleRepository.AddOrUpdateLikeAsync(like);
+                await _articleRepository.UpdateArticleLikeCountsAsync(articleId);
+
+                _logger.LogInformation("Article {ArticleId} liked successfully by User {UserId}", articleId, userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "LikeArticle failed for UserId {UserId}, ArticleId {ArticleId}: {Message}", userId, articleId, ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> DislikeArticleAsync(int userId, int articleId)
+        {
+            try
+            {
+                _logger.LogInformation("DislikeArticle called for UserId: {UserId}, ArticleId: {ArticleId}", userId, articleId);
+
+                var existingLike = await _articleRepository.GetUserLikeForArticleAsync(userId, articleId);
+
+                if (existingLike != null && existingLike.Status == LikeStatus.DisLike)
+                {
+                    _logger.LogInformation("Article {ArticleId} already disliked by User {UserId}", articleId, userId);
+                    return false;
+                }
+
+                var like = new Like
+                {
+                    UserId = userId,
+                    ArticleId = articleId,
+                    Status = LikeStatus.DisLike
+                };
+
+                await _articleRepository.AddOrUpdateLikeAsync(like);
+                await _articleRepository.UpdateArticleLikeCountsAsync(articleId);
+
+                _logger.LogInformation("Article {ArticleId} disliked successfully by User {UserId}", articleId, userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DislikeArticle failed for UserId {UserId}, ArticleId {ArticleId}: {Message}", userId, articleId, ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> ReportArticleAsync(int articleId)
+        {
+            try
+            {
+                _logger.LogInformation("ReportArticle called for ArticleId: {ArticleId}", articleId);
+
+                var article = await _articleRepository.GetArticleByIdAsync(articleId);
+                if (article == null)
+                {
+                    _logger.LogWarning("Article not found for ArticleId: {ArticleId}", articleId);
+                    return false;
+                }
+
+                await _articleRepository.IncrementArticleReportCountAsync(articleId);
+
+                var updatedArticle = await _articleRepository.GetArticleByIdAsync(articleId);
+                if (updatedArticle == null)
+                {
+                    _logger.LogError("Failed to retrieve updated article after incrementing report count for ArticleId: {ArticleId}", articleId);
+                    return false;
+                }
+
+                var adminUsers = await _userRepository.GetAllAdminUsersAsync();
+                if (adminUsers.Any())
+                {
+                    await _emailService.SendArticleReportNotificationToAdminsAsync(updatedArticle, adminUsers);
+                }
+                else
+                {
+                    _logger.LogWarning("No admin users found to send report notification for ArticleId: {ArticleId}", articleId);
+                }
+
+                _logger.LogInformation("Article reported successfully - ArticleId: {ArticleId}, Total Reports: {ReportCount}", articleId, updatedArticle.ReportCount);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ReportArticle failed for ArticleId {ArticleId}: {Message}", articleId, ex.Message);
+                return false;
+            }
+        }
     }
 }

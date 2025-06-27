@@ -9,5 +9,8 @@ namespace NewsAggregation.Services.Interfaces
         public Task<List<Article>> GetSavedArticles(int userId);
         public Task<bool> SaveUserArticle(int userId, int articleId);
         Task<List<Article>> SearchArticlesAsync(ArticleSearchRequest request);
+        Task<bool> LikeArticleAsync(int userId, int articleId);
+        Task<bool> DislikeArticleAsync(int userId, int articleId);
+        Task<bool> ReportArticleAsync(int articleId);
     }
 }

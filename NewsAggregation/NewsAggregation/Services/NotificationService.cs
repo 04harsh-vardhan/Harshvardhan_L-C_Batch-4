@@ -10,17 +10,20 @@ namespace NewsAggregation.Services
         private readonly INotificationRepository _notificationRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IArticleRepository _articleRepository;
+        private readonly IEmailService _emailService;
         private readonly ILogger<NotificationService> _logger;
 
         public NotificationService(
             INotificationRepository notificationRepository,
             ICategoryRepository categoryRepository,
             IArticleRepository articleRepository,
+            IEmailService emailService,
             ILogger<NotificationService> logger)
         {
             _notificationRepository = notificationRepository;
             _categoryRepository = categoryRepository;
             _articleRepository = articleRepository;
+            _emailService = emailService;
             _logger = logger;
         }
         public async Task<Notification> CreateNotificationAsync(CreateNotificationDto dto)
@@ -158,6 +161,95 @@ namespace NewsAggregation.Services
                 var searchText = $"{article.Article_Title} {article.Article_Description}".ToLower();
                 return keywordList.Any(keyword => searchText.Contains(keyword));
             }).ToList();
+        }
+
+        public async Task ProcessEmailNotificationsAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Starting email notification processing at {Time}", DateTime.UtcNow);
+
+                var pendingNotifications = await _notificationRepository.GetPendingNotificationsWithDetailsAsync();
+                
+                if (!pendingNotifications.Any())
+                {
+                    _logger.LogInformation("No pending notifications found for email processing");
+                    return;
+                }
+
+                var groupedByUser = pendingNotifications
+                    .GroupBy(pn => new { pn.UserId, pn.User.Email, pn.User.Username })
+                    .ToList();
+
+                _logger.LogInformation("Processing email notifications for {UserCount} users with total {NotificationCount} pending notifications", 
+                    groupedByUser.Count, pendingNotifications.Count);
+
+                foreach (var userGroup in groupedByUser)
+                {
+                    await ProcessUserEmailNotificationsAsync(userGroup.Key.Email, userGroup.Key.Username, userGroup.ToList());
+                }
+
+                _logger.LogInformation("Completed email notification processing at {Time}", DateTime.UtcNow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during email notification processing: {Message}", ex.Message);
+                throw;
+            }
+        }
+
+        private async Task ProcessUserEmailNotificationsAsync(string email, string username, List<PendingNotification> pendingNotifications)
+        {
+            try
+            {
+                _logger.LogInformation("Processing email notifications for user: {Email} with {Count} pending notifications", 
+                    email, pendingNotifications.Count);
+
+                var articles = pendingNotifications.Select(pn => pn.Article).ToList();
+                
+                await _emailService.SendGroupedArticleNotificationsAsync(email, username, articles);
+                
+                _logger.LogInformation("Email notification sent successfully to {Email} for {Count} articles", 
+                    email, articles.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to process email notifications for user {Email}: {Message}", 
+                    email, ex.Message);
+            }
+        }
+
+        public async Task<List<Article>> ViewNotificationsAsync(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("ViewNotifications request for UserId: {UserId}", userId);
+
+                var pendingNotifications = await _notificationRepository.GetPendingNotificationsByUserIdAsync(userId);
+                
+                if (!pendingNotifications.Any())
+                {
+                    _logger.LogInformation("No pending notifications found for UserId: {UserId}", userId);
+                    return new List<Article>();
+                }
+
+                var articles = pendingNotifications
+                    .Where(pn => pn.Article != null)
+                    .Select(pn => pn.Article)
+                    .ToList();
+
+                await _notificationRepository.RemovePendingNotificationsByUserIdAsync(userId);
+
+                _logger.LogInformation("ViewNotifications completed - Returned {Count} articles and cleared pending notifications for UserId: {UserId}", 
+                    articles.Count, userId);
+
+                return articles;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ViewNotifications failed for UserId {UserId}: {Message}", userId, ex.Message);
+                throw;
+            }
         }
     }
 }

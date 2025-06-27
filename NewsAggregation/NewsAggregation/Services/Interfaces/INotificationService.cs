@@ -8,5 +8,7 @@ namespace NewsAggregation.Services.Interfaces
         public Task<Notification> CreateNotificationAsync(CreateNotificationDto dto);
         public Task<List<UserNotificationConfigDto>> GetUserNotificationConfigAsync(int userId);
         public Task ProcessNotificationsAsync();
+        public Task ProcessEmailNotificationsAsync();
+        public Task<List<Article>> ViewNotificationsAsync(int userId);
     }
 }

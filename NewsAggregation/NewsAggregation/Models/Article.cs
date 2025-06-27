@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NewsAggregation.Models
 {
@@ -18,6 +18,7 @@ namespace NewsAggregation.Models
         [Column("created_at")]
         public DateTime Created_At { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;
+        public bool IsHidden { get; set; } = false;
         public int LikesCount { get; set; }
         public int DislikesCount { get; set; }
         public List<Like> Likes { get; private set; }

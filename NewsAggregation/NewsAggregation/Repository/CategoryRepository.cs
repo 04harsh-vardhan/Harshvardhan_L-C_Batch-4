@@ -13,17 +13,35 @@ namespace NewsAggregation.Repository
         }
         public async Task<int> GetCategoryIdByName(string categoryName)
         {
-            return await _dbContext.Categories.Where(c => c.Category_Name.ToLower() == categoryName.ToLower()).Select(c => c.Category_Id)
+            return await _dbContext.Categories.Where(c => c.Category_Name.ToLower() == categoryName.ToLower() && !c.IsHidden).Select(c => c.Category_Id)
                 .FirstOrDefaultAsync();
         }
         public async Task<List<Category>> GetAllCategories()
         {
-            return await _dbContext.Categories.ToListAsync();
+            return await _dbContext.Categories.Where(c => !c.IsHidden).ToListAsync();
         }
         public async Task SaveCategory(Category category)
         {
             await _dbContext.Categories.AddAsync(category);
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Category?> GetCategoryByNameAsync(string categoryName)
+        {
+            return await _dbContext.Categories
+                .FirstOrDefaultAsync(c => c.Category_Name.ToLower() == categoryName.ToLower());
+        }
+
+        public async Task<bool> HideCategoryAsync(int categoryId)
+        {
+            var category = await _dbContext.Categories.FindAsync(categoryId);
+            if (category != null)
+            {
+                category.IsHidden = true;
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

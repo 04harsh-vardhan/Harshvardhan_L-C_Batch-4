@@ -21,5 +21,16 @@ namespace NewsAggregation.Services
         {
             return await _categoryRepository.GetAllCategories();
         }
+
+        public async Task<bool> HideCategoryByNameAsync(string categoryName)
+        {
+            var category = await _categoryRepository.GetCategoryByNameAsync(categoryName);
+            if (category == null)
+            {
+                return false;
+            }
+            
+            return await _categoryRepository.HideCategoryAsync(category.Category_Id);
+        }
     }
 }

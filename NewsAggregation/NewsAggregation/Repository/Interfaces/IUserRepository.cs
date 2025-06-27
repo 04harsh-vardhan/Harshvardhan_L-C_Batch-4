@@ -9,5 +9,6 @@ namespace NewsAggregation.Repository.Interfaces
         public Task AddUser(SignupUserDto user);
         public Task<User?> GetSingleUser(string email);
         public Task<string> GetRoleById(int roleId);
+        public Task<List<User>> GetAllAdminUsersAsync();
     }
 }

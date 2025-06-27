@@ -51,5 +51,34 @@ namespace NewsAggregation.Repository
                 await _dbContext.SaveChangesAsync();
             }
         }
+        
+        public async Task<List<PendingNotification>> GetPendingNotificationsWithDetailsAsync()
+        {
+            return await _dbContext.PendingNotifications
+                .Include(pn => pn.User)
+                .Include(pn => pn.Article)
+                .ToListAsync();
+        }
+        
+        public async Task<List<PendingNotification>> GetPendingNotificationsByUserIdAsync(int userId)
+        {
+            return await _dbContext.PendingNotifications
+                .Include(pn => pn.Article)
+                .Where(pn => pn.UserId == userId)
+                .ToListAsync();
+        }
+        
+        public async Task RemovePendingNotificationsByUserIdAsync(int userId)
+        {
+            var pendingNotifications = await _dbContext.PendingNotifications
+                .Where(pn => pn.UserId == userId)
+                .ToListAsync();
+                
+            if (pendingNotifications.Any())
+            {
+                _dbContext.PendingNotifications.RemoveRange(pendingNotifications);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
     }
 }

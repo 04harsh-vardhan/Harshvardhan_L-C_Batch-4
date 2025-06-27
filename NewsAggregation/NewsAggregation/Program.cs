@@ -30,6 +30,7 @@ builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters
 builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters.NewsApiAdapter>();
 
 builder.Services.AddHostedService<ArticleSyncHostedService>();
+builder.Services.AddHostedService<EmailNotificationHostedService>();
 
 var app = builder.Build();
 

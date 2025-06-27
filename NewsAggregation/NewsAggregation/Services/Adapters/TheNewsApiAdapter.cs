@@ -27,20 +27,29 @@ namespace NewsAggregation.Services.Adapters
         {
             try
             {
+                List<Article> articles = new();
                 string apiUrl = _configuration["NewsApiUrls:TheNewsApi"] ?? "";
                 string token = _configuration["NewsApiKeys:TheNewsApi"] ?? "";
-                apiUrl = BuildUrl(apiUrl, token);
+                int page = 2;
+                int pageCount = 1;
+                while (pageCount < 20)
+                {
+                    apiUrl = BuildUrl(apiUrl, token, page);
 
-                TheNewsApi? theNewsApi = await GetApiDataAsync<TheNewsApi>(apiUrl);
-                if (theNewsApi?.Articles == null || !theNewsApi.Articles.Any())
-                    return new List<Article>();
+                    TheNewsApi? theNewsApi = await GetApiDataAsync<TheNewsApi>(apiUrl);
+                    if (theNewsApi?.Articles == null || !theNewsApi.Articles.Any())
+                        break;
 
-                using var scope = _serviceProvider.CreateScope();
-                var categoryRepository = scope.ServiceProvider.GetRequiredService<ICategoryRepository>();
-                var articleRepository = scope.ServiceProvider.GetRequiredService<IArticleRepository>();
-                
-                List<Category> allCategories = await categoryRepository.GetAllCategories();
-                return await MapToArticleModelAsync(theNewsApi, allCategories, articleRepository);
+                    using var scope = _serviceProvider.CreateScope();
+                    var categoryRepository = scope.ServiceProvider.GetRequiredService<ICategoryRepository>();
+                    var articleRepository = scope.ServiceProvider.GetRequiredService<IArticleRepository>();
+
+                    List<Category> allCategories = await categoryRepository.GetAllCategories();
+                    articles.AddRange(await MapToArticleModelAsync(theNewsApi, allCategories, articleRepository));
+                    page++;
+                    pageCount++;
+                }
+                return articles;
             }
             catch (Exception ex)
             {
@@ -77,9 +86,9 @@ namespace NewsAggregation.Services.Adapters
                 List<string> artCategories = theNewsApiArticle.Categories ?? new List<string>();
                 foreach (string category in artCategories)
                 {
-                    int? categoryId = allCategories.FirstOrDefault(c => 
+                    int? categoryId = allCategories.FirstOrDefault(c =>
                         c.Category_Name.ToLower() == category.ToLower())?.Category_Id;
-                    
+
                     if (categoryId != null)
                     {
                         await articleRepository.SaveArticleWithCategory(
@@ -93,9 +102,9 @@ namespace NewsAggregation.Services.Adapters
             return articles;
         }
 
-        private static string BuildUrl(string url, string token)
+        private static string BuildUrl(string url, string token, int page)
         {
-            return $"{url}{token}&locale=us&limit={3}";
+            return $"{url}{token}&locale=us&limit={3}&page={page}";
         }
     }
 }

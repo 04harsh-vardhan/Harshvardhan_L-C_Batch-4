@@ -23,40 +23,67 @@ namespace NewsAggregationFE.Controllers
         {
             bool running = true;
             string choice = "0";
+            
             while (running)
             {
-                switch (choice)
+                try
                 {
-                    case "0":
-                        choice = _welcomeScreen.ShowWelcomeMenu();
-                        break;
-                    case "1":
-                        try
-                        {
-                            bool isSuccess = await _authController.Login();
-                            if (!isSuccess)
+                    switch (choice)
+                    {
+                        case "0":
+                            choice = _welcomeScreen.ShowWelcomeMenu();
+                            break;
+                        case "1":
+                            bool loginSuccess = await _authController.Login();
+                            if (loginSuccess)
                             {
-                                choice = "0";
-                            }
-                            if (_appState.Role == "user")
-                            {
-
+                                if (_appState.Role?.ToLower() == "user")
+                                {
+                                    bool continueUserSession = true;
+                                    while (continueUserSession)
+                                    {
+                                        continueUserSession = await _userController.UserMenu();
+                                    }
+                                    choice = "0";
+                                }
+                                else if (_appState.Role?.ToLower() == "admin")
+                                {
+                                    bool continueAdminSession = true;
+                                    while (continueAdminSession)
+                                    {
+                                        continueAdminSession = await _adminController.AdminMenu();
+                                    }
+                                    choice = "0";
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Unknown user role. Returning to main menu.");
+                                    choice = "0";
+                                }
                             }
                             else
                             {
-                                await _adminController.AdminMenu();
+                                choice = "0";
                             }
-                        }
-                        catch (Exception ex)
-                        {
+                            break;
+                        case "2":
+                            Console.WriteLine("User registration is not implemented yet.");
                             choice = "0";
-                        }
-                        break;
-                    case "2":
-                        break;
-                    case "3":
-                        running = false;
-                        break;
+                            break;
+                        case "3":
+                            Console.WriteLine("Goodbye!");
+                            running = false;
+                            break;
+                        default:
+                            Console.WriteLine("Invalid option. Please try again.");
+                            choice = "0";
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    choice = "0";
                 }
             }
         }

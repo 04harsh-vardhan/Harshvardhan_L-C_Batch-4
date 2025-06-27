@@ -55,5 +55,28 @@ namespace NewsAggregation.Controllers
                 return StatusCode(500, new { success = false, message = "An error occurred while fetching notification configuration" });
             }
         }
+
+        [HttpGet("view/{userId}")]
+        public async Task<IActionResult> ViewNotifications(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("ViewNotifications request for UserId: {UserId}", userId);
+                var articles = await _notificationService.ViewNotificationsAsync(userId);
+                _logger.LogInformation("ViewNotifications completed - Returned {Count} articles for UserId: {UserId}", articles.Count, userId);
+                
+                return Ok(new
+                {
+                    success = true,
+                    data = articles,
+                    message = $"Found {articles.Count} pending notifications"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ViewNotifications failed for UserId {UserId}: {Message}", userId, ex.Message);
+                return StatusCode(500, new { success = false, message = "An error occurred while retrieving notifications" });
+            }
+        }
     }
 }

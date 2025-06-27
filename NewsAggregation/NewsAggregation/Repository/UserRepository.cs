@@ -45,5 +45,13 @@ namespace NewsAggregation.Repository
             }
             return role.UserRole;
         }
+
+        public async Task<List<User>> GetAllAdminUsersAsync()
+        {
+            return await _dbContext.Users
+                .Include(u => u.Role)
+                .Where(u => u.Role.UserRole.ToLower() == "admin")
+                .ToListAsync();
+        }
     }
 }

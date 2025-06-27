@@ -14,52 +14,71 @@ namespace NewsAggregationFE.Controllers
             _consoleView = consoleView;
             _adminService = adminService;
         }
+        
         public async Task<bool> AdminMenu()
         {
-            string choice = _consoleView.ReadInput("1. View the list of external servers and status\r\n2. View the external server’s details\r\n3. Update/Edit the external server’s details\r\n4. Add new News Category\r\n5. Logout");
-            switch (choice)
+            try
             {
-                case "1":
-                    _consoleView.ShowMessages("List of external servers:");
-                    List<ExternalServerList> externalServers = await _adminService.GetExternalServersList();
-                    string data = _adminService.ConcateServersDetails(externalServers);
-                    _consoleView.ShowMessages(data);
-                    break;
-                case "2":
-                    _consoleView.ShowMessages("List of external server details:");
-                    List<ExternalServerDetail> externalServerDetails = await _adminService.GetExternalServersDetails();
-                    string sData = _adminService.ConcateList(externalServerDetails);
-                    _consoleView.ShowMessages(sData);
-                    break;
-                case "3":
-                    try
-                    {
-                        _consoleView.ShowMessages("Update/Edit the external server’s details\r\nEnter the external server ID");
-                        string serverId = _consoleView.ReadInput("");
-                        string apiKey = _consoleView.ReadInput("Enter the updated API key");
-                        await _adminService.UpdateServer(serverId, apiKey);
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-                    break;
-                case "4":
-                    try
-                    {
-                        string newCategory = _consoleView.ReadInput("Enter new Category");
-                        await _adminService.AddNewCategory(newCategory);
-                    }
-                    catch (Exception ex)
-                    { }
-                    break;
-                case "5":
-                    // Logout
-                    break;
-                default:
-                    break;
+                string choice = _consoleView.ReadInput("\n--- Admin Menu ---\n1. View the list of external servers and status\n2. View the external server's details\n3. Update/Edit the external server's details\n4. Add new News Category\n5. Logout\nEnter your choice:");
+                
+                switch (choice)
+                {
+                    case "1":
+                        _consoleView.ShowMessages("\nList of external servers:");
+                        List<ExternalServerList> externalServers = await _adminService.GetExternalServersList();
+                        string data = _adminService.ConcateServersDetails(externalServers);
+                        _consoleView.ShowMessages(data);
+                        return true;
+                        
+                    case "2":
+                        _consoleView.ShowMessages("\nList of external server details:");
+                        List<ExternalServerDetail> externalServerDetails = await _adminService.GetExternalServersDetails();
+                        string sData = _adminService.ConcateList(externalServerDetails);
+                        _consoleView.ShowMessages(sData);
+                        return true;
+                        
+                    case "3":
+                        try
+                        {
+                            _consoleView.ShowMessages("\nUpdate/Edit the external server's details");
+                            string serverId = _consoleView.ReadInput("Enter the external server ID:");
+                            string apiKey = _consoleView.ReadInput("Enter the updated API key:");
+                            await _adminService.UpdateServer(serverId, apiKey);
+                            _consoleView.ShowMessages("Server updated successfully!");
+                        }
+                        catch (Exception ex)
+                        {
+                            _consoleView.ShowMessages($"Error updating server: {ex.Message}");
+                        }
+                        return true;
+                        
+                    case "4":
+                        try
+                        {
+                            string newCategory = _consoleView.ReadInput("Enter new Category:");
+                            await _adminService.AddNewCategory(newCategory);
+                            _consoleView.ShowMessages("Category added successfully!");
+                        }
+                        catch (Exception ex)
+                        {
+                            _consoleView.ShowMessages($"Error adding category: {ex.Message}");
+                        }
+                        return true;
+                        
+                    case "5":
+                        _consoleView.ShowMessages("Logging out...");
+                        return false;
+                        
+                    default:
+                        _consoleView.ShowMessages("Invalid option. Please try again.");
+                        return true;
+                }
             }
-            return true;
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"An error occurred: {ex.Message}");
+                return true;
+            }
         }
     }
 }

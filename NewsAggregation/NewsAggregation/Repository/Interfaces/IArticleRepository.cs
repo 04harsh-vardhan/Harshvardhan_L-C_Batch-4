@@ -14,5 +14,11 @@ namespace NewsAggregation.Repository.Interfaces
         public Task<List<int>> GetArticleIdsByCategoryId(int categoryId);
         public Task<List<Article>> GetNewArticlesSince(int categoryId, DateTime since);
         Task<List<Article>> SearchArticlesAsync(ArticleSearchRequest request);
+        Task<Like?> GetUserLikeForArticleAsync(int userId, int articleId);
+        Task AddOrUpdateLikeAsync(Like like);
+        Task RemoveLikeAsync(int userId, int articleId);
+        Task UpdateArticleLikeCountsAsync(int articleId);
+        Task<Article?> GetArticleByIdAsync(int articleId);
+        Task IncrementArticleReportCountAsync(int articleId);
     }
 }
