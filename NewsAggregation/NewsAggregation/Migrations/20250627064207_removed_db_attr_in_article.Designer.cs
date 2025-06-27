@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsAggregation.Models;
 
@@ -11,9 +12,11 @@ using NewsAggregation.Models;
 namespace NewsAggregation.Migrations
 {
     [DbContext(typeof(NewsAggDBContext))]
-    partial class NewsAggDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250627064207_removed_db_attr_in_article")]
+    partial class removed_db_attr_in_article
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

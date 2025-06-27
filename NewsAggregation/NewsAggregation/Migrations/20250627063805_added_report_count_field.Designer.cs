@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsAggregation.Models;
 
@@ -11,9 +12,11 @@ using NewsAggregation.Models;
 namespace NewsAggregation.Migrations
 {
     [DbContext(typeof(NewsAggDBContext))]
-    partial class NewsAggDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250627063805_added_report_count_field")]
+    partial class added_report_count_field
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,25 +29,31 @@ namespace NewsAggregation.Migrations
                 {
                     b.Property<int>("Article_Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("article_id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Article_Id"));
 
                     b.Property<string>("Article_Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("article_description");
 
                     b.Property<string>("Article_Source")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("article_source");
 
                     b.Property<string>("Article_Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("article_title");
 
                     b.Property<string>("Article_Url")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("article_url");
 
                     b.Property<DateTime>("Created_At")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at");
 
                     b.Property<int>("DislikesCount")
                         .HasColumnType("int");

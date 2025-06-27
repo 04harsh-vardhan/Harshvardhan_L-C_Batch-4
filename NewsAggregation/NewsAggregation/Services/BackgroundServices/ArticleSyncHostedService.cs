@@ -6,7 +6,7 @@ namespace NewsAggregation.Services.BackgroundServices
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ArticleSyncHostedService> _logger;
-        private readonly TimeSpan _syncInterval = TimeSpan.FromHours(6);
+        private readonly TimeSpan _syncInterval = TimeSpan.FromMinutes(5);
 
         public ArticleSyncHostedService(
             IServiceProvider serviceProvider,
