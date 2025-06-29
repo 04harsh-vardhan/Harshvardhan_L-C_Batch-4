@@ -28,6 +28,7 @@ namespace NewsAggregation.Utils
             {
             new Claim(JwtRegisteredClaimNames.Sub, user.Username),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.NameId,user.UserId.ToString()),
             new Claim("role", role)
         };
 

@@ -97,16 +97,18 @@ namespace NewsAggregationFE.Presentation
             // Mock article for demonstration
             var article = new Article
             {
-                Id = "123",
-                Title = "Tesla Unusual Options Activity - Tesla (NASDAQ: TSLA)",
-                Description = "Deep-pocketed investors have adopted a bearish approach towards Tesla TSLA, and it's something market players shouldn't ignore. Our tracking of public options r…",
-                Source = "benzinga.com",
-                Url = "https://www.benzinga.com/insights/options/25/03/44379781/tesla-unusual-options-activity",
-                Category = "business"
+                Article_Id = 123,
+                Article_Title = "Tesla Unusual Options Activity - Tesla (NASDAQ: TSLA)",
+                Article_Description = "Deep-pocketed investors have adopted a bearish approach towards Tesla TSLA, and it's something market players shouldn't ignore. Our tracking of public options r…",
+                Article_Source = "benzinga.com",
+                Article_Url = "https://www.benzinga.com/insights/options/25/03/44379781/tesla-unusual-options-activity",
+                Created_At = DateTime.Now,
+                LikesCount = 0,
+                DislikesCount = 0
             };
 
             DisplayArticle(article);
-            await ShowArticleOptions(article.Id);
+            await ShowArticleOptions(article.Article_Id.ToString());
         }
 
         private async Task ShowDateRangeHeadlines()
@@ -131,12 +133,14 @@ namespace NewsAggregationFE.Presentation
             // Mock saved article for demonstration
             var article = new Article
             {
-                Id = "123",
-                Title = "Tesla Unusual Options Activity - Tesla (NASDAQ: TSLA)",
-                Description = "Deep-pocketed investors have adopted a bearish approach towards Tesla TSLA, and it's something market players shouldn't ignore. Our tracking of public options r…",
-                Source = "benzinga.com",
-                Url = "https://www.benzinga.com/insights/options/25/03/44379781/tesla-unusual-options-activity",
-                Category = "business"
+                Article_Id = 123,
+                Article_Title = "Tesla Unusual Options Activity - Tesla (NASDAQ: TSLA)",
+                Article_Description = "Deep-pocketed investors have adopted a bearish approach towards Tesla TSLA, and it's something market players shouldn't ignore. Our tracking of public options r…",
+                Article_Source = "benzinga.com",
+                Article_Url = "https://www.benzinga.com/insights/options/25/03/44379781/tesla-unusual-options-activity",
+                Created_At = DateTime.Now,
+                LikesCount = 0,
+                DislikesCount = 0
             };
 
             DisplayArticle(article);
@@ -186,16 +190,18 @@ namespace NewsAggregationFE.Presentation
             // Mock search result for demonstration
             var article = new Article
             {
-                Id = "123",
-                Title = "Tesla Unusual Options Activity - Tesla (NASDAQ: TSLA)",
-                Description = "Deep-pocketed investors have adopted a bearish approach towards Tesla TSLA, and it's something market players shouldn't ignore. Our tracking of public options r…",
-                Source = "benzinga.com",
-                Url = "https://www.benzinga.com/insights/options/25/03/44379781/tesla-unusual-options-activity",
-                Category = "business"
+                Article_Id = 123,
+                Article_Title = "Tesla Unusual Options Activity - Tesla (NASDAQ: TSLA)",
+                Article_Description = "Deep-pocketed investors have adopted a bearish approach towards Tesla TSLA, and it's something market players shouldn't ignore. Our tracking of public options r…",
+                Article_Source = "benzinga.com",
+                Article_Url = "https://www.benzinga.com/insights/options/25/03/44379781/tesla-unusual-options-activity",
+                Created_At = DateTime.Now,
+                LikesCount = 0,
+                DislikesCount = 0
             };
 
             DisplayArticle(article);
-            await ShowArticleOptions(article.Id);
+            await ShowArticleOptions(article.Article_Id.ToString());
         }
 
         private async Task ShowNotificationsMenu()
@@ -262,12 +268,13 @@ namespace NewsAggregationFE.Presentation
 
         private void DisplayArticle(Article article)
         {
-            _view.ShowMessages($"\nArticle Id: {article.Id}");
-            _view.ShowMessages(article.Title);
-            _view.ShowMessages(article.Description);
-            _view.ShowMessages($"source: {article.Source}");
-            _view.ShowMessages($"URL: {article.Url}");
-            _view.ShowMessages($"Category: {article.Category}");
+            _view.ShowMessages($"\nArticle Id: {article.Article_Id}");
+            _view.ShowMessages(article.Article_Title);
+            _view.ShowMessages(article.Article_Description ?? "No description available");
+            _view.ShowMessages($"source: {article.Article_Source ?? "Unknown"}");
+            _view.ShowMessages($"URL: {article.Article_Url ?? "No URL available"}");
+            _view.ShowMessages($"Date: {article.Created_At:yyyy-MM-dd HH:mm}");
+            _view.ShowMessages($"Likes: {article.LikesCount}, Dislikes: {article.DislikesCount}");
         }
 
         private async Task ShowArticleOptions(string articleId)

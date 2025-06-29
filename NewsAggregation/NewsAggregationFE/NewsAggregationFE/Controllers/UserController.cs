@@ -61,9 +61,22 @@ namespace NewsAggregationFE.Controllers
 
         private string ShowWelcomeMessage()
         {
-            _consoleView.ShowMessages($"\nWelcome to the News Application, {_appState.Username}!");
-            _consoleView.ShowMessages($"Date: {DateTime.Now:yyyy-MM-dd}, Time: {DateTime.Now:HH:mm:ss}");
-            return _consoleView.ReadInput("\n--- User Menu ---\n1. Headlines\n2. Saved Articles\n3. Search\n4. Notifications\n5. Logout\nEnter your choice:");
+            _consoleView.ShowMessages($"\nWelcome to the News Application, {_appState.Username}! Date: {DateTime.Now:dd-MMM-yyyy}");
+            _consoleView.ShowMessages("");
+            _consoleView.ShowMessages($"Time:{DateTime.Now:h:mmtt}");
+            _consoleView.ShowMessages("");
+            _consoleView.ShowMessages("Please choose the options below");
+            _consoleView.ShowMessages("");
+            _consoleView.ShowMessages("1. Headlines");
+            _consoleView.ShowMessages("");
+            _consoleView.ShowMessages("2. Saved Articles");
+            _consoleView.ShowMessages("");
+            _consoleView.ShowMessages("3. Search");
+            _consoleView.ShowMessages("");
+            _consoleView.ShowMessages("4. Notifications");
+            _consoleView.ShowMessages("");
+            _consoleView.ShowMessages("5. Logout");
+            return _consoleView.ReadInput("");
         }
 
         private async Task ShowHeadlinesMenu()
@@ -154,7 +167,9 @@ namespace NewsAggregationFE.Controllers
         {
             try
             {
-                var categories = await _userService.GetAllCategoriesAsync();
+                var allCategories = await _userService.GetAllCategoriesAsync();
+                var categories = allCategories.Where(c => !c.IsHidden).ToList();
+                
                 if (!categories.Any())
                 {
                     _consoleView.ShowMessages("No categories available.");
@@ -164,16 +179,16 @@ namespace NewsAggregationFE.Controllers
                 _consoleView.ShowMessages("\nAvailable categories:");
                 for (int i = 0; i < categories.Count; i++)
                 {
-                    _consoleView.ShowMessages($"{i + 1}. {categories[i].CategoryName}");
+                    _consoleView.ShowMessages($"{i + 1}. {categories[i].Category_Name}");
                 }
 
                 string choice = _consoleView.ReadInput("Select category number:");
                 if (int.TryParse(choice, out int categoryIndex) && categoryIndex > 0 && categoryIndex <= categories.Count)
                 {
                     var selectedCategory = categories[categoryIndex - 1];
-                    _consoleView.ShowMessages($"\nFetching headlines for category: {selectedCategory.CategoryName}...");
+                    _consoleView.ShowMessages($"\nFetching headlines for category: {selectedCategory.Category_Name}...");
                     
-                    var response = await _userService.GetNewsAsync(category: selectedCategory.CategoryName);
+                    var response = await _userService.GetNewsAsync(category: selectedCategory.Category_Name);
                     
                     if (response.Success && response.Data.Any())
                     {
@@ -182,7 +197,7 @@ namespace NewsAggregationFE.Controllers
                     }
                     else
                     {
-                        _consoleView.ShowMessages($"No headlines found for category: {selectedCategory.CategoryName}");
+                        _consoleView.ShowMessages($"No headlines found for category: {selectedCategory.Category_Name}");
                     }
                 }
                 else

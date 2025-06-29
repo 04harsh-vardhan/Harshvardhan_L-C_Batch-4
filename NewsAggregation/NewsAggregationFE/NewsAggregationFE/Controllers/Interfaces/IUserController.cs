@@ -2,5 +2,6 @@
 {
     public interface IUserController
     {
+        Task<bool> UserMenu();
     }
 }

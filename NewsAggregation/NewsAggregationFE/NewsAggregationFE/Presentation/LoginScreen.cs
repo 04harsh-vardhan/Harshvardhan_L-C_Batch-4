@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using NewsAggregationFE.Core.Interfaces;
+﻿using NewsAggregationFE.Core.Interfaces;
 using NewsAggregationFE.Core.Models;
 using NewsAggregationFE.Services.Interfaces;
 
@@ -35,40 +34,5 @@ namespace NewsAggregationFE.Presentation
             }
         }
 
-        public async Task<bool> SignUp()
-        {
-            _view.ShowMessages("\nSign Up");
-            var username = _view.ReadInput("Enter username: ");
-            var email = _view.ReadInput("Enter email: ");
-            var password = _view.ReadInput("Enter password: ");
-
-            if (!ValidateEmail(email))
-            {
-                _view.ShowMessages("\nError: Invalid email format");
-                return false;
-            }
-
-            try
-            {
-                return await _authService.SignUp(new User
-                {
-                    Username = username,
-                    Email = email,
-                    Password = password,
-                    Role = UserRole.User
-                });
-            }
-            catch (Exception ex)
-            {
-                _view.ShowMessages($"\nError: {ex.Message}");
-                return false;
-            }
-        }
-
-        private bool ValidateEmail(string email)
-        {
-            var pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-            return Regex.IsMatch(email, pattern);
-        }
     }
 }

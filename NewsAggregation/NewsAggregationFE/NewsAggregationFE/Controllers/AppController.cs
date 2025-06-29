@@ -23,7 +23,7 @@ namespace NewsAggregationFE.Controllers
         {
             bool running = true;
             string choice = "0";
-            
+
             while (running)
             {
                 try
@@ -67,7 +67,11 @@ namespace NewsAggregationFE.Controllers
                             }
                             break;
                         case "2":
-                            Console.WriteLine("User registration is not implemented yet.");
+                            bool signupSuccess = await _authController.SignUp();
+                            if (signupSuccess)
+                            {
+                                Console.WriteLine("Registration completed successfully. Please login to continue.");
+                            }
                             choice = "0";
                             break;
                         case "3":

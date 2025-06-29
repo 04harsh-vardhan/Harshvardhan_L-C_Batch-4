@@ -2,24 +2,24 @@
 
 namespace NewsAggregationFE.Core.Models
 {
-    public class ExternalServerResponse
+    public class ExternalServer
     {
-        public List<Data> Data { get; set; }
-    }
-
-    public class Data
-    {
-        [JsonProperty("server_Name")]
-        public string ServerName { get; set; }
         [JsonProperty("server_ID")]
-        public int ServerID { get; set; }
+        public int Server_ID { get; set; }
+        
+        [JsonProperty("server_Name")]
+        public string Server_Name { get; set; } = string.Empty;
+        
         [JsonProperty("server_Status")]
-        public bool ServerStatus { get; set; }
-        [JsonProperty("server_UR")]
-        public string ServerURL { get; set; }
+        public bool Server_Status { get; set; }
+        
+        [JsonProperty("server_URL")]
+        public string Server_URL { get; set; } = string.Empty;
+        
         [JsonProperty("server_API_KEY")]
-        public string ServerAPIKEY { get; set; }
+        public string Server_API_KEY { get; set; } = string.Empty;
+        
         [JsonProperty("last_accessed")]
-        public DateTime LastAccessed { get; set; }
+        public DateTime Last_accessed { get; set; }
     }
 }

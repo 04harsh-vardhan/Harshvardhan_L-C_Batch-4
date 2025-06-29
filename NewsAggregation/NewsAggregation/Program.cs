@@ -2,7 +2,6 @@ using NewsAggregation.Models;
 using NewsAggregation.Repository;
 using NewsAggregation.Repository.Interfaces;
 using NewsAggregation.Services;
-using NewsAggregation.Services.BackgroundServices;
 using NewsAggregation.Services.Interfaces;
 using NewsAggregation.Utils;
 
@@ -29,8 +28,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters.TheNewsApiAdapter>();
 builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters.NewsApiAdapter>();
 
-builder.Services.AddHostedService<ArticleSyncHostedService>();
-builder.Services.AddHostedService<EmailNotificationHostedService>();
+//builder.Services.AddHostedService<ArticleSyncHostedService>();
+//builder.Services.AddHostedService<EmailNotificationHostedService>();
 
 var app = builder.Build();
 

@@ -16,7 +16,7 @@ namespace NewsAggregationFE.Presentation
             _view.ShowMessages(new string('=', 50));
             _view.ShowMessages("\nPlease choose an option:");
             _view.ShowMessages("1. Login");
-            _view.ShowMessages("2. Sign up (Not implemented)");
+            _view.ShowMessages("2. Sign up");
             _view.ShowMessages("3. Exit");
             _view.ShowMessages(new string('-', 30));
             return _view.ReadInput("Enter your choice:");

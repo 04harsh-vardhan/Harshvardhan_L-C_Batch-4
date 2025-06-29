@@ -31,8 +31,7 @@ namespace NewsAggregationFE
                 .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var appConfiguration = new AppConfiguration();
-            configuration.Bind(appConfiguration);
+            var appConfiguration = configuration.Get<AppConfiguration>() ?? new AppConfiguration();
             services.AddSingleton(appConfiguration);
 
             // Register services

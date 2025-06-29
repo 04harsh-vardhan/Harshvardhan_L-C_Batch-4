@@ -28,8 +28,12 @@ namespace NewsAggregationFE.Services
 
                 _appState.JwtToken = response.Token.ToString();
                 _appState.Role = response.Role;
-                _appState.Username = response.Username ?? "";
-                _appState.UserId = response.UserId;
+                
+                // Extract userId and username from JWT token
+                var (userId, username) = JwtTokenParser.ExtractUserInfo(response.Token);
+                _appState.UserId = userId;
+                _appState.Username = username ?? "";
+                
                 HttpRequest.SetAuthToken(_appState.JwtToken);
                 return true;
             }
@@ -39,21 +43,16 @@ namespace NewsAggregationFE.Services
             }
         }
 
-        public async Task<bool> SignUp(User user)
+        public async Task<bool> SignUp(SignupUserDto signupData)
         {
             try
             {
-                var response = await HttpRequest.PostRequest<User, dynamic>(user, $"{_baseUrl}/register");
-                if (response == null)
-                {
-                    throw new Exception("Registration failed");
-                }
-                return true;
-
+                var response = await HttpRequest.PostRequest<SignupUserDto, bool>(signupData, $"{_baseUrl}/signup");
+                return response;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Registration failed: {ex.Message}");
+                throw new Exception($"Registration failed: {ex.Message}", ex);
             }
         }
     }

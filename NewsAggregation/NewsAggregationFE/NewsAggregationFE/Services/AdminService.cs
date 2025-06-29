@@ -21,51 +21,59 @@ namespace NewsAggregationFE.Services
         }
         public async Task<List<ExternalServerList>> GetExternalServersList()
         {
-            ExternalServerResponse? serverResponse = await HttpRequest.GetRequest<ExternalServerResponse>(_getAllServersUrl);
+            List<ExternalServer>? servers = await HttpRequest.GetRequest<List<ExternalServer>>(_getAllServersUrl);
             List<ExternalServerList> externalServerDetails = new List<ExternalServerList>();
-            foreach (Data data in serverResponse.Data)
+            
+            if (servers != null)
             {
-                externalServerDetails.Add(new ExternalServerList
+                foreach (ExternalServer server in servers)
                 {
-                    ApiName = data.ServerName
-                    ,
-                    Status = data.ServerStatus ? "Active" : "Not Active",
-                    LastAccessed = data.LastAccessed
-                });
+                    externalServerDetails.Add(new ExternalServerList
+                    {
+                        ApiName = server.Server_Name,
+                        Status = server.Server_Status ? "Active" : "Not Active",
+                        LastAccessed = server.Last_accessed
+                    });
+                }
             }
             return externalServerDetails;
         }
         public string ConcateServersDetails(List<ExternalServerList> externalServerDetails)
         {
             string output = "";
-            foreach (var sd in externalServerDetails)
+            for (int i = 0; i < externalServerDetails.Count; i++)
             {
-                output += $"{sd.ApiName} - {sd.Status} - last accessed: {sd.LastAccessed}\n";
+                var server = externalServerDetails[i];
+                output += $"{i + 1}. {server.ApiName} - {server.Status} - last accessed: {server.LastAccessed:dd MMM yyyy}\n";
             }
             return output;
         }
         public async Task<List<ExternalServerDetail>> GetExternalServersDetails()
         {
-            ExternalServerResponse? serverResponse = await HttpRequest.GetRequest<ExternalServerResponse>(_getAllServersUrl);
+            List<ExternalServer>? servers = await HttpRequest.GetRequest<List<ExternalServer>>(_getAllServersUrl);
             List<ExternalServerDetail> externalServerDetails = new List<ExternalServerDetail>();
-            foreach (Data data in serverResponse.Data)
+            
+            if (servers != null)
             {
-                externalServerDetails.Add(new ExternalServerDetail
+                foreach (ExternalServer server in servers)
                 {
-                    ServerId = data.ServerID,
-                    ServerName = data.ServerName,
-                    ServerAPIKEY = data.ServerAPIKEY
+                    externalServerDetails.Add(new ExternalServerDetail
+                    {
+                        ServerId = server.Server_ID,
+                        ServerName = server.Server_Name,
+                        ServerAPIKEY = server.Server_API_KEY
+                    });
                 }
-                );
             }
             return externalServerDetails;
         }
         public string ConcateList(List<ExternalServerDetail> externalServerDetails)
         {
             string output = string.Empty;
-            foreach (var sd in externalServerDetails)
+            for (int i = 0; i < externalServerDetails.Count; i++)
             {
-                output += $"{sd.ServerId}. {sd.ServerName} - {sd.ServerAPIKEY}\n";
+                var server = externalServerDetails[i];
+                output += $"{i + 1}. {server.ServerName} - {server.ServerAPIKEY}\n";
             }
             return output;
         }
