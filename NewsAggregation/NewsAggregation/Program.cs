@@ -1,7 +1,9 @@
+using NewsAggregation.Middlewares;
 using NewsAggregation.Models;
 using NewsAggregation.Repository;
 using NewsAggregation.Repository.Interfaces;
 using NewsAggregation.Services;
+using NewsAggregation.Services.BackgroundServices;
 using NewsAggregation.Services.Interfaces;
 using NewsAggregation.Utils;
 
@@ -29,7 +31,7 @@ builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters
 builder.Services.AddSingleton<INewsApiAdapter, NewsAggregation.Services.Adapters.NewsApiAdapter>();
 
 //builder.Services.AddHostedService<ArticleSyncHostedService>();
-//builder.Services.AddHostedService<EmailNotificationHostedService>();
+builder.Services.AddHostedService<EmailNotificationHostedService>();
 
 var app = builder.Build();
 
@@ -38,7 +40,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseMiddleware<ContentTypeVaildation>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
