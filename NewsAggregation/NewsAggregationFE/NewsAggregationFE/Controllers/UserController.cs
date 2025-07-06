@@ -302,7 +302,8 @@ namespace NewsAggregationFE.Controllers
             {
                 _consoleView.ShowMessages("\n=== NOTIFICATIONS ===");
                 _consoleView.ShowMessages("1. View Pending Notifications");
-                _consoleView.ShowMessages("2. Back to Main Menu");
+                _consoleView.ShowMessages("2. Configure Notifications");
+                _consoleView.ShowMessages("3. Back to Main Menu");
                 
                 string choice = _consoleView.ReadInput("Enter your choice:");
                 
@@ -312,6 +313,9 @@ namespace NewsAggregationFE.Controllers
                         await ShowPendingNotifications();
                         break;
                     case "2":
+                        await ShowNotificationConfiguration();
+                        break;
+                    case "3":
                         return;
                     default:
                         _consoleView.ShowMessages("Invalid choice. Please try again.");
@@ -353,6 +357,185 @@ namespace NewsAggregationFE.Controllers
             catch (Exception ex)
             {
                 _consoleView.ShowMessages($"Error fetching pending notifications: {ex.Message}");
+            }
+        }
+
+        private async Task ShowNotificationConfiguration()
+        {
+            try
+            {
+                if (!_appState.UserId.HasValue)
+                {
+                    _consoleView.ShowMessages("Unable to retrieve user information.");
+                    return;
+                }
+
+                int userId = _appState.UserId.Value;
+                _consoleView.ShowMessages("\n=== NOTIFICATION CONFIGURATION ===");
+                _consoleView.ShowMessages("Loading your notification settings...");
+
+                var configs = await _userService.GetUserNotificationConfigAsync(userId);
+                
+                if (!configs.Any())
+                {
+                    _consoleView.ShowMessages("No categories found.");
+                    return;
+                }
+
+                _consoleView.ShowMessages("\nCurrent notification settings:");
+                _consoleView.ShowMessages(new string('-', 60));
+                
+                for (int i = 0; i < configs.Count; i++)
+                {
+                    var config = configs[i];
+                    var status = config.IsEnabled ? "ENABLED" : "DISABLED";
+                    var keywords = !string.IsNullOrEmpty(config.Keywords) ? config.Keywords : "None";
+                    
+                    _consoleView.ShowMessages($"{i + 1}. {config.CategoryName} - {status}");
+                    if (config.IsEnabled)
+                    {
+                        _consoleView.ShowMessages($"   Keywords: {keywords}");
+                    }
+                }
+                
+                _consoleView.ShowMessages(new string('-', 60));
+                _consoleView.ShowMessages($"{configs.Count + 1}. Back to Notifications Menu");
+                
+                string choice = _consoleView.ReadInput("\nSelect category to configure:");
+                
+                if (int.TryParse(choice, out int categoryIndex) && categoryIndex > 0 && categoryIndex <= configs.Count)
+                {
+                    await ConfigureNotificationForCategory(configs[categoryIndex - 1]);
+                }
+                else if (categoryIndex == configs.Count + 1)
+                {
+                    return;
+                }
+                else
+                {
+                    _consoleView.ShowMessages("Invalid selection.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error loading notification configuration: {ex.Message}");
+            }
+        }
+
+        private async Task ConfigureNotificationForCategory(UserNotificationConfigDto config)
+        {
+            try
+            {
+                if (!_appState.UserId.HasValue)
+                {
+                    _consoleView.ShowMessages("Unable to retrieve user information.");
+                    return;
+                }
+
+                int userId = _appState.UserId.Value;
+                
+                _consoleView.ShowMessages($"\n=== CONFIGURING: {config.CategoryName} ===");
+                _consoleView.ShowMessages($"Current Status: {(config.IsEnabled ? "ENABLED" : "DISABLED")}");
+                
+                if (config.IsEnabled)
+                {
+                    _consoleView.ShowMessages($"Current Keywords: {config.Keywords ?? "None"}");
+                }
+
+                _consoleView.ShowMessages("\nOptions:");
+                _consoleView.ShowMessages("1. Enable Notifications");
+                _consoleView.ShowMessages("2. Disable Notifications");
+                _consoleView.ShowMessages("3. Back");
+                
+                string choice = _consoleView.ReadInput("Enter your choice:");
+                
+                switch (choice)
+                {
+                    case "1":
+                        await EnableNotificationForCategory(userId, config);
+                        break;
+                    case "2":
+                        await DisableNotificationForCategory(userId, config);
+                        break;
+                    case "3":
+                        return;
+                    default:
+                        _consoleView.ShowMessages("Invalid choice.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error configuring notification: {ex.Message}");
+            }
+        }
+
+        private async Task EnableNotificationForCategory(int userId, UserNotificationConfigDto config)
+        {
+            try
+            {
+                string keywords = _consoleView.ReadInput($"\nEnter keywords for {config.CategoryName} (comma-separated, or press Enter for none):");
+                
+                if (string.IsNullOrWhiteSpace(keywords))
+                {
+                    keywords = string.Empty;
+                }
+
+                var createDto = new CreateNotificationDto
+                {
+                    UserId = userId,
+                    CategoryId = config.CategoryId,
+                    Keywords = keywords,
+                    IsEnabled = true
+                };
+
+                bool success = await _userService.CreateNotificationAsync(createDto);
+                
+                if (success)
+                {
+                    _consoleView.ShowMessages($"\n✓ Notifications enabled for {config.CategoryName}!");
+                    if (!string.IsNullOrEmpty(keywords))
+                    {
+                        _consoleView.ShowMessages($"Keywords: {keywords}");
+                    }
+                }
+                else
+                {
+                    _consoleView.ShowMessages($"\n✗ Failed to enable notifications for {config.CategoryName}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error enabling notification: {ex.Message}");
+            }
+        }
+
+        private async Task DisableNotificationForCategory(int userId, UserNotificationConfigDto config)
+        {
+            try
+            {
+                var createDto = new CreateNotificationDto
+                {
+                    UserId = userId,
+                    CategoryId = config.CategoryId,
+                    Keywords = string.Empty,
+                    IsEnabled = false
+                };
+
+                bool success = await _userService.CreateNotificationAsync(createDto);
+                
+                if (success)
+                {
+                    _consoleView.ShowMessages($"\n✓ Notifications disabled for {config.CategoryName}.");
+                }
+                else
+                {
+                    _consoleView.ShowMessages($"\n✗ Failed to disable notifications for {config.CategoryName}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error disabling notification: {ex.Message}");
             }
         }
 

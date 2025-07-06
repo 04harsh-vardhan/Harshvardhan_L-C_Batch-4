@@ -13,5 +13,7 @@ namespace NewsAggregationFE.Services.Interfaces
         Task<bool> ReportArticleAsync(int articleId);
         Task<List<Category>> GetAllCategoriesAsync();
         Task<List<Article>> GetPendingNotificationsAsync(int userId);
+        Task<List<UserNotificationConfigDto>> GetUserNotificationConfigAsync(int userId);
+        Task<bool> CreateNotificationAsync(CreateNotificationDto dto);
     }
 }

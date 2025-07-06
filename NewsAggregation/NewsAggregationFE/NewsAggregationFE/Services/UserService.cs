@@ -169,5 +169,33 @@ namespace NewsAggregationFE.Services
                 throw new Exception($"Failed to get pending notifications: {ex.Message}", ex);
             }
         }
+
+        public async Task<List<UserNotificationConfigDto>> GetUserNotificationConfigAsync(int userId)
+        {
+            try
+            {
+                var url = $"{_config.ApiUrls.GetNotificationUrl()}/user-config/{userId}";
+                var response = await HttpRequest.GetRequest<NotificationConfigResponse>(url, _appState.JwtToken);
+                return response?.Data ?? new List<UserNotificationConfigDto>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to get user notification config: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<bool> CreateNotificationAsync(CreateNotificationDto dto)
+        {
+            try
+            {
+                var url = $"{_config.ApiUrls.GetNotificationUrl()}/create";
+                var response = await HttpRequest.PostRequest<CreateNotificationDto, object>(dto, url, _appState.JwtToken);
+                return response != null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to create notification: {ex.Message}", ex);
+            }
+        }
     }
 }
