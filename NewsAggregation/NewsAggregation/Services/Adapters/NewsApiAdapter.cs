@@ -75,7 +75,6 @@ namespace NewsAggregation.Services.Adapters
                 int articleId = await articleRepository.SaveArticleAndGetId(newArticle);
                 newArticle.Article_Id = articleId;
 
-                // Category matching based on description content
                 foreach (Category category in allCategories)
                 {
                     if (!string.IsNullOrEmpty(newArticle.Article_Description) && 

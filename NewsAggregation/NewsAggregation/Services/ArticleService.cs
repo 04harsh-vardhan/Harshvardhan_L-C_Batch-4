@@ -55,9 +55,13 @@ namespace NewsAggregation.Services
                     return new List<Article>();
                 }
 
+                int reportThreshold = _configuration.GetValue<int>("ArticleSettings:ReportThreshold", 5);
+                var filteredByReports = articles.Where(a => a.ReportCount < reportThreshold).ToList();
+                _logger.LogInformation("Filtered out {Count} articles with report count >= {Threshold}", articles.Count - filteredByReports.Count, reportThreshold);
+
                 if (string.IsNullOrEmpty(category))
                 {
-                    return articles;
+                    return filteredByReports;
                 }
 
                 int categoryId = await _categoryRepository.GetCategoryIdByName(category);
@@ -76,7 +80,7 @@ namespace NewsAggregation.Services
                 }
 
                 var articleIdsSet = articleIdsForCategory.ToHashSet();
-                var filteredArticles = articles.Where(a => articleIdsSet.Contains(a.Article_Id)).ToList();
+                var filteredArticles = filteredByReports.Where(a => articleIdsSet.Contains(a.Article_Id)).ToList();
                 _logger.LogInformation("Filtered to {Count} articles for category: {Category}", filteredArticles.Count, category);
                 return filteredArticles;
             }
@@ -96,8 +100,12 @@ namespace NewsAggregation.Services
         {
             _logger.LogInformation("GetSavedArticles called for UserId: {UserId}", userId);
             var result = await _articleRepository.GetSavedArticles(userId);
-            _logger.LogInformation("Found {Count} saved articles for UserId: {UserId}", result.Count, userId);
-            return result;
+            
+            int reportThreshold = _configuration.GetValue<int>("ArticleSettings:ReportThreshold", 5);
+            var filteredResult = result.Where(a => a.ReportCount < reportThreshold).ToList();
+            _logger.LogInformation("Found {Count} saved articles for UserId: {UserId}, filtered out {FilteredCount} articles with high report count", filteredResult.Count, userId, result.Count - filteredResult.Count);
+            
+            return filteredResult;
         }
 
         public async Task<bool> SaveUserArticle(int userId, int articleId)
@@ -126,8 +134,12 @@ namespace NewsAggregation.Services
             }
 
             var result = await _articleRepository.SearchArticlesAsync(request);
-            _logger.LogInformation("SearchArticlesAsync found {Count} articles", result.Count);
-            return result;
+            
+            int reportThreshold = _configuration.GetValue<int>("ArticleSettings:ReportThreshold", 5);
+            var filteredResult = result.Where(a => a.ReportCount < reportThreshold).ToList();
+            _logger.LogInformation("SearchArticlesAsync found {Count} articles, filtered out {FilteredCount} articles with high report count", filteredResult.Count, result.Count - filteredResult.Count);
+            
+            return filteredResult;
         }
 
         public async Task<bool> LikeArticleAsync(int userId, int articleId)

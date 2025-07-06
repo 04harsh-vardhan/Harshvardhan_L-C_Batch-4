@@ -12,19 +12,22 @@ namespace NewsAggregation.Services
         private readonly IArticleRepository _articleRepository;
         private readonly IEmailService _emailService;
         private readonly ILogger<NotificationService> _logger;
+        private readonly IConfiguration _configuration;
 
         public NotificationService(
             INotificationRepository notificationRepository,
             ICategoryRepository categoryRepository,
             IArticleRepository articleRepository,
             IEmailService emailService,
-            ILogger<NotificationService> logger)
+            ILogger<NotificationService> logger,
+            IConfiguration configuration)
         {
             _notificationRepository = notificationRepository;
             _categoryRepository = categoryRepository;
             _articleRepository = articleRepository;
             _emailService = emailService;
             _logger = logger;
+            _configuration = configuration;
         }
         public async Task<Notification> CreateNotificationAsync(CreateNotificationDto dto)
         {
@@ -65,7 +68,6 @@ namespace NewsAggregation.Services
             {
                 _logger.LogInformation("Starting notification processing at {Time}", DateTime.UtcNow);
 
-                // Get all enabled notifications
                 var enabledNotifications = await _notificationRepository.GetAllEnabledNotificationsAsync();
                 _logger.LogInformation("Found {Count} enabled notifications to process", enabledNotifications.Count);
 
@@ -90,7 +92,6 @@ namespace NewsAggregation.Services
                 _logger.LogDebug("Processing notification for User {UserId}, Category {CategoryId}", 
                     notification.UserId, notification.CategoryId);
 
-                // Get articles added after the last accessed date for the specific category
                 var newArticles = await _articleRepository.GetNewArticlesSince(
                     notification.CategoryId, 
                     notification.LastAccessed);
@@ -102,7 +103,6 @@ namespace NewsAggregation.Services
                     return;
                 }
 
-                // Filter articles by keywords if specified
                 var matchingArticles = FilterArticlesByKeywords(newArticles, notification.Keywords);
 
                 if (!matchingArticles.Any())
@@ -238,12 +238,16 @@ namespace NewsAggregation.Services
                     .Select(pn => pn.Article)
                     .ToList();
 
+                int reportThreshold = _configuration.GetValue<int>("ArticleSettings:ReportThreshold", 5);
+                var filteredArticles = articles.Where(a => a.ReportCount < reportThreshold).ToList();
+                _logger.LogInformation("ViewNotifications - Filtered out {Count} articles with report count >= {Threshold}", articles.Count - filteredArticles.Count, reportThreshold);
+
                 await _notificationRepository.RemovePendingNotificationsByUserIdAsync(userId);
 
                 _logger.LogInformation("ViewNotifications completed - Returned {Count} articles and cleared pending notifications for UserId: {UserId}", 
-                    articles.Count, userId);
+                    filteredArticles.Count, userId);
 
-                return articles;
+                return filteredArticles;
             }
             catch (Exception ex)
             {

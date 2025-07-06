@@ -45,7 +45,6 @@ namespace NewsAggregation.Services
                 _logger.LogInformation($"{loginUserRequest.Email} user password is wrong");
                 throw new Exception("UserPassword is Wrong");
             }
-            //Todo: here I need to generate the JWT token for the user
             string role = await _userRepository.GetRoleById(user.RoleId);
             return new LoginResponseDto { Token = GenerateJwtToken(user, role), Role = role };
         }

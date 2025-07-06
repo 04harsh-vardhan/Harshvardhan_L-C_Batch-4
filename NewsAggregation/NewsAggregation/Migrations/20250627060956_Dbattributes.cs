@@ -5,11 +5,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NewsAggregation.Migrations
 {
-    /// <inheritdoc />
     public partial class Dbattributes : Migration
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+            protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
                 name: "Articles",
@@ -300,8 +298,7 @@ namespace NewsAggregation.Migrations
                 column: "RoleId");
         }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+            protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Article_Categories");

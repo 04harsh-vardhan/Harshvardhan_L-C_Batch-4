@@ -12,17 +12,6 @@
         public async Task Invoke(HttpContext httpContext)
         {
             _logger.LogInformation("Checking Content Type In middleware");
-            //if (httpContext.Request.Headers.ContainsKey("Content-Type"))
-            //{
-            //    if (httpContext.Request.Headers.TryGetValue("Content-Type", out var contentType))
-            //    {
-            //        if (contentType != "application/json")
-            //        {
-            //            httpContext.Response.StatusCode = 401;
-            //            return;
-            //        }
-            //    }
-            //}
             await _next(httpContext);
         }
     }
