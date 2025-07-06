@@ -12,5 +12,6 @@ namespace NewsAggregationFE.Services.Interfaces
         Task<bool> DislikeArticleAsync(int userId, int articleId);
         Task<bool> ReportArticleAsync(int articleId);
         Task<List<Category>> GetAllCategoriesAsync();
+        Task<List<Article>> GetPendingNotificationsAsync(int userId);
     }
 }

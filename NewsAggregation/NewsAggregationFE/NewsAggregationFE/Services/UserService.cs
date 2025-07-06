@@ -155,5 +155,19 @@ namespace NewsAggregationFE.Services
                 throw new Exception($"Failed to get categories: {ex.Message}", ex);
             }
         }
+
+        public async Task<List<Article>> GetPendingNotificationsAsync(int userId)
+        {
+            try
+            {
+                var url = $"{_config.ApiUrls.GetNotificationUrl()}/view/{userId}";
+                var response = await HttpRequest.GetRequest<NotificationResponse>(url, _appState.JwtToken);
+                return response?.Data ?? new List<Article>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to get pending notifications: {ex.Message}", ex);
+            }
+        }
     }
 }

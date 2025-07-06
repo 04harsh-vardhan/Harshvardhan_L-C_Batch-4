@@ -298,8 +298,62 @@ namespace NewsAggregationFE.Controllers
 
         private async Task ShowNotificationsMenu()
         {
-            _consoleView.ShowMessages("Notifications feature is not implemented yet.");
-            await Task.CompletedTask;
+            try
+            {
+                _consoleView.ShowMessages("\n=== NOTIFICATIONS ===");
+                _consoleView.ShowMessages("1. View Pending Notifications");
+                _consoleView.ShowMessages("2. Back to Main Menu");
+                
+                string choice = _consoleView.ReadInput("Enter your choice:");
+                
+                switch (choice)
+                {
+                    case "1":
+                        await ShowPendingNotifications();
+                        break;
+                    case "2":
+                        return;
+                    default:
+                        _consoleView.ShowMessages("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error in notifications menu: {ex.Message}");
+            }
+        }
+
+        private async Task ShowPendingNotifications()
+        {
+            try
+            {
+                if (!_appState.UserId.HasValue)
+                {
+                    _consoleView.ShowMessages("Unable to retrieve user information.");
+                    return;
+                }
+
+                int userId = _appState.UserId.Value;
+                _consoleView.ShowMessages("\nFetching your pending notifications...");
+
+                var pendingArticles = await _userService.GetPendingNotificationsAsync(userId);
+                
+                if (pendingArticles.Any())
+                {
+                    _consoleView.ShowMessages($"\nYou have {pendingArticles.Count} pending notification(s):");
+                    DisplayArticles(pendingArticles);
+                    await HandleArticleInteraction(pendingArticles);
+                }
+                else
+                {
+                    _consoleView.ShowMessages("\nNo pending notifications found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error fetching pending notifications: {ex.Message}");
+            }
         }
 
         private void DisplayArticles(List<Article> articles)

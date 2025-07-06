@@ -78,9 +78,13 @@ namespace NewsAggregation.Repository
         }
         public async Task<List<Article>> GetSavedArticles(int userId)
         {
-            List<SavedArticle> savedArticles = await _dbContext.SavedArticles.Where(sa => sa.UserId == userId).ToListAsync();
+            var savedArticleIds = await _dbContext.SavedArticles
+                .Where(sa => sa.UserId == userId)
+                .Select(sa => sa.ArticleId)
+                .ToListAsync();
+            
             return await _dbContext.Articles
-                .Where(a => savedArticles.Any(sa => sa.ArticleId == a.Article_Id) && !a.IsHidden)
+                .Where(a => savedArticleIds.Contains(a.Article_Id) && !a.IsHidden)
                 .ToListAsync();
         }
         public async Task<bool> SaveUserArticle(int userId, int articleId)
