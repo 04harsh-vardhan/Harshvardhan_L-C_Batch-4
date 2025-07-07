@@ -14,12 +14,14 @@ namespace NewsAggregationFE.Core.Models
         public string CategoryEndpoint { get; set; } = string.Empty;
         public string ArticleEndpoint { get; set; } = string.Empty;
         public string NotificationEndpoint { get; set; } = string.Empty;
+        public string ModeratedKeywordEndpoint { get; set; } = string.Empty;
 
         public string GetUserUrl() => BaseUrl + UserEndpoint;
         public string GetServerUrl() => BaseUrl + ServerEndpoint;
         public string GetCategoryUrl() => BaseUrl + CategoryEndpoint;
         public string GetArticleUrl() => BaseUrl + ArticleEndpoint;
         public string GetNotificationUrl() => BaseUrl + NotificationEndpoint;
+        public string GetModeratedKeywordUrl() => BaseUrl + ModeratedKeywordEndpoint;
     }
 
     public class ApplicationSettings

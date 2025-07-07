@@ -21,6 +21,7 @@ namespace NewsAggregation.Models
         public DbSet<ArticleCategory> ArticleCategories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<PendingNotification> PendingNotifications { get; set; }
+        public DbSet<ModeratedKeywords> ModeratedKeywords { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -111,6 +112,12 @@ namespace NewsAggregation.Models
                 entity.Property(pn => pn.PendingNotificationId).ValueGeneratedOnAdd();
             }
             );
+            modelBuilder.Entity<ModeratedKeywords>(entity =>
+            {
+                entity.ToTable("Moderated_Keywords");
+                entity.HasKey(mk => mk.Id);
+                entity.Property(mk => mk.Id).ValueGeneratedOnAdd();
+            });
         }
     }
 }

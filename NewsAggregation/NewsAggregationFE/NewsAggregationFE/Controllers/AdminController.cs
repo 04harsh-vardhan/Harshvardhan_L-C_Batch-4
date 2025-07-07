@@ -19,7 +19,7 @@ namespace NewsAggregationFE.Controllers
         {
             try
             {
-                string choice = _consoleView.ReadInput("\n--- Admin Menu ---\n1. View the list of external servers and status\n2. View the external server's details\n3. Update/Edit the external server's details\n4. Add new News Category\n5. Manage Category Visibility\n6. Logout\nEnter your choice:");
+                string choice = _consoleView.ReadInput("\n--- Admin Menu ---\n1. View the list of external servers and status\n2. View the external server's details\n3. Update/Edit the external server's details\n4. Add new News Category\n5. Manage Category Visibility\n6. Manage Moderated Keywords\n7. Logout\nEnter your choice:");
                 
                 switch (choice)
                 {
@@ -44,6 +44,10 @@ namespace NewsAggregationFE.Controllers
                         return true;
                         
                     case "6":
+                        await ShowModeratedKeywordManagement();
+                        return true;
+                        
+                    case "7":
                         _consoleView.ShowMessages("Logging out...");
                         return false;
                         
@@ -249,6 +253,136 @@ namespace NewsAggregationFE.Controllers
             catch (Exception ex)
             {
                 _consoleView.ShowMessages($"Error updating category: {ex.Message}");
+                _consoleView.ShowMessages("\nPress any key to continue...");
+                Console.ReadKey();
+            }
+        }
+
+        private async Task ShowModeratedKeywordManagement()
+        {
+            try
+            {
+                _consoleView.ShowMessages("\n=== MODERATED KEYWORD MANAGEMENT ===");
+                _consoleView.ShowMessages("1. View All Moderated Keywords");
+                _consoleView.ShowMessages("2. Add New Moderated Keyword");
+                _consoleView.ShowMessages("3. Back to Admin Menu");
+                
+                string choice = _consoleView.ReadInput("\nEnter your choice:");
+                
+                switch (choice)
+                {
+                    case "1":
+                        await ShowAllModeratedKeywords();
+                        break;
+                    case "2":
+                        await ShowAddModeratedKeyword();
+                        break;
+                    case "3":
+                        return;
+                    default:
+                        _consoleView.ShowMessages("Invalid choice. Please try again.");
+                        _consoleView.ShowMessages("\nPress any key to continue...");
+                        Console.ReadKey();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error in moderated keyword management: {ex.Message}");
+                _consoleView.ShowMessages("\nPress any key to return to Admin Menu...");
+                Console.ReadKey();
+            }
+        }
+
+        private async Task ShowAllModeratedKeywords()
+        {
+            try
+            {
+                _consoleView.ShowMessages("\n=== ALL MODERATED KEYWORDS ===");
+                _consoleView.ShowMessages("Loading moderated keywords...");
+
+                var keywords = await _adminService.GetAllModeratedKeywordsAsync();
+                
+                if (!keywords.Any())
+                {
+                    _consoleView.ShowMessages("\nNo moderated keywords found.");
+                }
+                else
+                {
+                    _consoleView.ShowMessages($"\nFound {keywords.Count} moderated keyword(s):");
+                    _consoleView.ShowMessages(new string('-', 50));
+                    
+                    for (int i = 0; i < keywords.Count; i++)
+                    {
+                        var keyword = keywords[i];
+                        _consoleView.ShowMessages($"{i + 1}. {keyword.Keyword} (ID: {keyword.Id})");
+                    }
+                    
+                    _consoleView.ShowMessages(new string('-', 50));
+                }
+                
+                _consoleView.ShowMessages("\nNote: These keywords are used to filter inappropriate content in articles and notifications.");
+                _consoleView.ShowMessages("\nPress any key to continue...");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error loading moderated keywords: {ex.Message}");
+                _consoleView.ShowMessages("\nPress any key to continue...");
+                Console.ReadKey();
+            }
+        }
+
+        private async Task ShowAddModeratedKeyword()
+        {
+            try
+            {
+                _consoleView.ShowMessages("\n=== ADD MODERATED KEYWORD ===");
+                _consoleView.ShowMessages("Enter a keyword that should be moderated/filtered from content.");
+                _consoleView.ShowMessages("This keyword will be used to identify inappropriate articles and notifications.");
+                
+                string keyword = _consoleView.ReadInput("\nEnter keyword to moderate:");
+                
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    _consoleView.ShowMessages("\nKeyword cannot be empty. Operation cancelled.");
+                    _consoleView.ShowMessages("\nPress any key to continue...");
+                    Console.ReadKey();
+                    return;
+                }
+
+                keyword = keyword.Trim();
+                
+                _consoleView.ShowMessages($"\nYou are about to add '{keyword}' as a moderated keyword.");
+                _consoleView.ShowMessages("This will affect content filtering across the entire application.");
+                
+                string confirm = _consoleView.ReadInput($"\nAre you sure you want to add '{keyword}' to moderated keywords? (y/n):");
+                
+                if (confirm.ToLower() == "y" || confirm.ToLower() == "yes")
+                {
+                    bool success = await _adminService.AddModeratedKeywordAsync(keyword);
+                    
+                    if (success)
+                    {
+                        _consoleView.ShowMessages($"\n✓ Keyword '{keyword}' has been successfully added to moderated keywords!");
+                        _consoleView.ShowMessages("It will now be used for content filtering.");
+                    }
+                    else
+                    {
+                        _consoleView.ShowMessages($"\n✗ Failed to add keyword '{keyword}'. It may already exist or there was an error.");
+                    }
+                }
+                else
+                {
+                    _consoleView.ShowMessages("\nOperation cancelled.");
+                }
+                
+                _consoleView.ShowMessages("\nPress any key to continue...");
+                Console.ReadKey();
+            }
+            catch (Exception ex)
+            {
+                _consoleView.ShowMessages($"Error adding moderated keyword: {ex.Message}");
                 _consoleView.ShowMessages("\nPress any key to continue...");
                 Console.ReadKey();
             }

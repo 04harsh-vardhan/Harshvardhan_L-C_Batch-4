@@ -12,5 +12,7 @@ namespace NewsAggregationFE.Services.Interfaces
         public Task AddNewCategory(string category);
         public Task<List<CategoryStatusDto>> GetCategoriesStatusAsync();
         public Task<bool> UpdateCategoryStatusAsync(UpdateCategoryStatusDto updateDto);
+        public Task<List<ModeratedKeywordDto>> GetAllModeratedKeywordsAsync();
+        public Task<bool> AddModeratedKeywordAsync(string keyword);
     }
 }

@@ -11,17 +11,22 @@ namespace NewsAggregationFE.Services
         private readonly string _addCategoryUrl;
         private readonly string _getCategoriesStatusUrl;
         private readonly string _updateCategoryStatusUrl;
+        private readonly string _getModeratedKeywordsUrl;
+        private readonly string _addModeratedKeywordUrl;
 
         public AdminService(AppConfiguration config)
         {
             var serverBaseUrl = config.ApiUrls.GetServerUrl();
             var categoryBaseUrl = config.ApiUrls.GetCategoryUrl();
+            var moderatedKeywordBaseUrl = config.ApiUrls.GetModeratedKeywordUrl();
             
             _getAllServersUrl = $"{serverBaseUrl}/GetAllServers";
             _updateServerUrl = $"{serverBaseUrl}/UpdateServer";
             _addCategoryUrl = $"{categoryBaseUrl}/AddCategory";
             _getCategoriesStatusUrl = $"{categoryBaseUrl}/status";
             _updateCategoryStatusUrl = $"{categoryBaseUrl}/status";
+            _getModeratedKeywordsUrl = moderatedKeywordBaseUrl;
+            _addModeratedKeywordUrl = moderatedKeywordBaseUrl;
         }
         public async Task<List<ExternalServerList>> GetExternalServersList()
         {
@@ -128,6 +133,33 @@ namespace NewsAggregationFE.Services
             catch (Exception e)
             {
                 throw new Exception($"Failed to update category status: {e.Message}", e);
+            }
+        }
+
+        public async Task<List<ModeratedKeywordDto>> GetAllModeratedKeywordsAsync()
+        {
+            try
+            {
+                var response = await HttpRequest.GetRequest<ModeratedKeywordResponse>(_getModeratedKeywordsUrl);
+                return response?.Data ?? new List<ModeratedKeywordDto>();
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to get moderated keywords: {e.Message}", e);
+            }
+        }
+
+        public async Task<bool> AddModeratedKeywordAsync(string keyword)
+        {
+            try
+            {
+                var addKeywordDto = new AddModeratedKeywordDto { Keyword = keyword };
+                var response = await HttpRequest.PostRequest<AddModeratedKeywordDto, object>(addKeywordDto, _addModeratedKeywordUrl);
+                return response != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to add moderated keyword: {e.Message}", e);
             }
         }
     }
