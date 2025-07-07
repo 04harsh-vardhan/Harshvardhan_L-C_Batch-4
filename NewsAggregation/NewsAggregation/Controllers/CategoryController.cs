@@ -57,5 +57,52 @@ namespace NewsAggregation.Controllers
                 return StatusCode(500, new { success = false, message = "An error occurred while hiding the category" });
             }
         }
+
+        [HttpGet("status")]
+        public async Task<IActionResult> GetCategoriesStatus()
+        {
+            try
+            {
+                _logger.LogInformation("GetCategoriesStatus request");
+                var result = await _categoryService.GetAllCategoriesStatusAsync();
+                _logger.LogInformation("GetCategoriesStatus completed - Found {Count} categories", result.Count);
+                return Ok(new
+                {
+                    success = true,
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetCategoriesStatus failed: {Message}", ex.Message);
+                return StatusCode(500, new { success = false, message = "An error occurred while fetching category status" });
+            }
+        }
+
+        [HttpPut("status")]
+        public async Task<IActionResult> UpdateCategoryStatus([FromBody] UpdateCategoryStatusDto updateDto)
+        {
+            try
+            {
+                _logger.LogInformation("UpdateCategoryStatus request for CategoryId: {CategoryId}, IsEnabled: {IsEnabled}", updateDto.CategoryId, updateDto.IsEnabled);
+                var result = await _categoryService.UpdateCategoryStatusAsync(updateDto.CategoryId, updateDto.IsEnabled);
+                
+                if (result)
+                {
+                    _logger.LogInformation("UpdateCategoryStatus completed successfully for CategoryId: {CategoryId}", updateDto.CategoryId);
+                    return Ok(new { success = true, message = "Category status updated successfully" });
+                }
+                else
+                {
+                    _logger.LogWarning("UpdateCategoryStatus failed - Category not found: {CategoryId}", updateDto.CategoryId);
+                    return NotFound(new { success = false, message = "Category not found" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateCategoryStatus failed for CategoryId {CategoryId}: {Message}", updateDto.CategoryId, ex.Message);
+                return StatusCode(500, new { success = false, message = "An error occurred while updating category status" });
+            }
+        }
     }
 }

@@ -9,6 +9,8 @@ namespace NewsAggregationFE.Services
         private readonly string _getAllServersUrl;
         private readonly string _updateServerUrl;
         private readonly string _addCategoryUrl;
+        private readonly string _getCategoriesStatusUrl;
+        private readonly string _updateCategoryStatusUrl;
 
         public AdminService(AppConfiguration config)
         {
@@ -18,6 +20,8 @@ namespace NewsAggregationFE.Services
             _getAllServersUrl = $"{serverBaseUrl}/GetAllServers";
             _updateServerUrl = $"{serverBaseUrl}/UpdateServer";
             _addCategoryUrl = $"{categoryBaseUrl}/AddCategory";
+            _getCategoriesStatusUrl = $"{categoryBaseUrl}/status";
+            _updateCategoryStatusUrl = $"{categoryBaseUrl}/status";
         }
         public async Task<List<ExternalServerList>> GetExternalServersList()
         {
@@ -98,6 +102,32 @@ namespace NewsAggregationFE.Services
             catch (Exception e)
             {
                 throw;
+            }
+        }
+
+        public async Task<List<CategoryStatusDto>> GetCategoriesStatusAsync()
+        {
+            try
+            {
+                var response = await HttpRequest.GetRequest<CategoryStatusResponse>(_getCategoriesStatusUrl);
+                return response?.Data ?? new List<CategoryStatusDto>();
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to get categories status: {e.Message}", e);
+            }
+        }
+
+        public async Task<bool> UpdateCategoryStatusAsync(UpdateCategoryStatusDto updateDto)
+        {
+            try
+            {
+                var response = await HttpRequest.PutRequest<UpdateCategoryStatusDto, object>(updateDto, _updateCategoryStatusUrl);
+                return response != null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to update category status: {e.Message}", e);
             }
         }
     }

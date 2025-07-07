@@ -10,5 +10,7 @@ namespace NewsAggregationFE.Services.Interfaces
         public string ConcateList(List<ExternalServerDetail> externalServerDetails);
         public Task UpdateServer(string serverId, string apiKey);
         public Task AddNewCategory(string category);
+        public Task<List<CategoryStatusDto>> GetCategoriesStatusAsync();
+        public Task<bool> UpdateCategoryStatusAsync(UpdateCategoryStatusDto updateDto);
     }
 }

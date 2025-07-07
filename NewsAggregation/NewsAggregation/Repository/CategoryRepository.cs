@@ -20,6 +20,11 @@ namespace NewsAggregation.Repository
         {
             return await _dbContext.Categories.Where(c => !c.IsHidden).ToListAsync();
         }
+
+        public async Task<List<Category>> GetAllCategoriesIncludingHiddenAsync()
+        {
+            return await _dbContext.Categories.ToListAsync();
+        }
         public async Task SaveCategory(Category category)
         {
             await _dbContext.Categories.AddAsync(category);
@@ -38,6 +43,18 @@ namespace NewsAggregation.Repository
             if (category != null)
             {
                 category.IsHidden = true;
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> UpdateCategoryStatusAsync(int categoryId, bool isHidden)
+        {
+            var category = await _dbContext.Categories.FindAsync(categoryId);
+            if (category != null)
+            {
+                category.IsHidden = isHidden;
                 await _dbContext.SaveChangesAsync();
                 return true;
             }
