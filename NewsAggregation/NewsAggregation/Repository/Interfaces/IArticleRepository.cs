@@ -1,0 +1,24 @@
+﻿using NewsAggregation.Models;
+using NewsAggregation.Models.DTO;
+
+namespace NewsAggregation.Repository.Interfaces
+{
+    public interface IArticleRepository
+    {
+        public Task<List<Article>> GetFilteredNewsWithDate(DateTime startDate, DateTime endDate);
+        public Task<bool> SaveArticles(List<Article> articles);
+        public Task<List<Article>> GetSavedArticles(int userId);
+        public Task<bool> SaveUserArticle(int userId, int articleId);
+        public Task<int> SaveArticleAndGetId(Article article);
+        public Task SaveArticleWithCategory(ArticleCategory articleCategory);
+        public Task<List<int>> GetArticleIdsByCategoryId(int categoryId);
+        public Task<List<Article>> GetNewArticlesSince(int categoryId, DateTime since);
+        Task<List<Article>> SearchArticlesAsync(ArticleSearchRequest request);
+        Task<Like?> GetUserLikeForArticleAsync(int userId, int articleId);
+        Task AddOrUpdateLikeAsync(Like like);
+        Task RemoveLikeAsync(int userId, int articleId);
+        Task UpdateArticleLikeCountsAsync(int articleId);
+        Task<Article?> GetArticleByIdAsync(int articleId);
+        Task IncrementArticleReportCountAsync(int articleId);
+    }
+}
